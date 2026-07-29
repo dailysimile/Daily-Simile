@@ -574,22 +574,59 @@ function showStatus(msg){
   setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2000);
 }
 
-const usingSyncStorage = typeof window.storage !== "undefined";
+// SHARED_BLOB_ID: once set, every visitor (any device, anywhere) reads and writes
+// the same shared data. Left blank until the one-time setup step creates it.
+const SHARED_BLOB_ID = "";
+const BLOB_API = "https://jsonblob.com/api/jsonBlob";
+let blobId = SHARED_BLOB_ID;
+
+async function ensureBlob(){
+  if(blobId) return blobId;
+  // First time ever running: create the shared storage spot and show the ID
+  const initial = {
+    "simile-categories": JSON.stringify(DEFAULT_CATEGORIES),
+    "simile-entries": JSON.stringify([])
+  };
+  const res = await fetch(BLOB_API, {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "Accept": "application/json"},
+    body: JSON.stringify(initial)
+  });
+  const location = res.headers.get("Location") || "";
+  blobId = location.split("/").pop();
+  showSetupBanner(blobId);
+  return blobId;
+}
+
+function showSetupBanner(id){
+  const banner = document.createElement("div");
+  banner.style.cssText = "position:fixed;top:0;left:0;right:0;background:#2B4640;color:#fff;padding:16px;text-align:center;z-index:9999;font-family:Helvetica,Arial,sans-serif;";
+  banner.innerHTML = `<strong>One-time setup needed!</strong> Send this code to Claude: <code style="background:#fff;color:#2B4640;padding:2px 8px;border-radius:4px;">${id}</code>`;
+  document.body.prepend(banner);
+}
 
 async function storageGet(key){
-  if(usingSyncStorage){
-    const res = await window.storage.get(key, true);
-    return res && res.value ? res.value : null;
-  }
-  return localStorage.getItem(key);
+  const id = await ensureBlob();
+  try{
+    const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data[key] || null;
+  }catch(e){ return null; }
 }
 
 async function storageSet(key, value){
-  if(usingSyncStorage){
-    await window.storage.set(key, value, true);
-  } else {
-    localStorage.setItem(key, value);
-  }
+  const id = await ensureBlob();
+  try{
+    const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+    const current = getRes.ok ? await getRes.json() : {};
+    current[key] = value;
+    await fetch(`${BLOB_API}/${id}`, {
+      method: "PUT",
+      headers: {"Content-Type": "application/json", "Accept": "application/json"},
+      body: JSON.stringify(current)
+    });
+  }catch(e){ showStatus("Couldn't save — check your connection"); }
 }
 
 async function loadData(){
