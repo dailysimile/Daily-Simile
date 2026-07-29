@@ -5,16 +5,16 @@
 <title>Simile Collector</title>
 <style>
   :root{
-    --bg: #FBF6EC;
+    --bg: #F5F3EF;
     --panel: #FFFFFF;
-    --ink: #2B4640;
-    --muted: #4F7A70;
-    --muted-soft: #9ED1C7;
-    --gold: #DC694C;
-    --gold-soft: #FBDCCF;
-    --panel-line: #C7D6B1;
-    --danger: #B23A2E;
-    --ok: #59A898;
+    --ink: #3A3D42;
+    --muted: #8B9199;
+    --muted-soft: #D8DCE0;
+    --gold: #7C9885;
+    --gold-soft: #E3E8E1;
+    --panel-line: #E4E1DB;
+    --danger: #B5695A;
+    --ok: #7B98A8;
   }
   *{box-sizing:border-box;}
   body{
@@ -25,13 +25,13 @@
     min-height:100vh;
   }
   html{
-    background: #FBF6EC;
+    background: #F5F3EF;
   }
   .wrap{
     max-width: 760px;
     margin: 0 auto;
     padding: 32px 20px 80px;
-    background: #FBF6EC;
+    background: #F5F3EF;
     min-height: 100vh;
   }
   header{
@@ -116,7 +116,7 @@
   .field{ margin-bottom: 16px; }
   textarea, input, select{
     width:100%;
-    background: #FFFFFF;
+    background: #F5F3EF;
     border: 1px solid var(--panel-line);
     color: var(--ink);
     padding: 10px 12px;
@@ -392,11 +392,6 @@
 
   <!-- LIBRARY VIEW -->
   <div class="view active" id="view-library">
-    <div class="backup-bar">
-      <button class="btn-small" id="exportBtn">Download a backup</button>
-      <button class="btn-small" id="importBtn">Load a backup</button>
-      <input type="file" id="importFile" accept=".json" style="display:none;">
-    </div>
     <input type="text" id="searchInput" class="search-box" placeholder="Search by author, book, or category...">
     <div class="filters" id="filters"></div>
     <div id="list"></div>
@@ -459,13 +454,18 @@
       <p>Only the reviewer needs this. Default PIN is <strong>2468</strong> — tell Claude if you'd like it changed.</p>
     </div>
     <div id="reviewList" style="display:none;"></div>
+    <div class="backup-bar" id="backupBar" style="display:none;">
+      <button class="btn-small" id="exportBtn">Download a backup</button>
+      <button class="btn-small" id="importBtn">Load a backup</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;">
+    </div>
     <button class="signout" id="lockAgainBtn" style="display:none;">Lock review screen</button>
   </div>
 
 </div>
 
 <script>
-const DEFAULT_CATEGORIES = ["Nature", "Emotion", "People", "Time", "Other"];
+const DEFAULT_CATEGORIES = ["Nature", "Emotion", "People", "Place", "Time", "Other"];
 const REVIEW_PIN = "2468";
 
 const SEED_ENTRIES = [
@@ -576,7 +576,7 @@ function showStatus(msg){
 
 // SHARED_BLOB_ID: once set, every visitor (any device, anywhere) reads and writes
 // the same shared data. Left blank until the one-time setup step creates it.
-const SHARED_BLOB_ID = "";
+const SHARED_BLOB_ID = "019fb00c-891a-781b-ae16-14ce38b9ce61";
 const BLOB_API = "https://jsonblob.com/api/jsonBlob";
 let blobId = SHARED_BLOB_ID;
 
@@ -994,6 +994,7 @@ $("unlockBtn").onclick = ()=>{
     $("lockCard").style.display = "none";
     $("reviewList").style.display = "block";
     $("lockAgainBtn").style.display = "block";
+    $("backupBar").style.display = "flex";
     renderReview();
   } else {
     showStatus("");
@@ -1006,6 +1007,7 @@ $("lockAgainBtn").onclick = ()=>{
   $("lockCard").style.display = "block";
   $("reviewList").style.display = "none";
   $("lockAgainBtn").style.display = "none";
+  $("backupBar").style.display = "none";
   $("pinInput").value = "";
 };
 
