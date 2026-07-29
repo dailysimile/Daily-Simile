@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simile Collector</title>
+<style>
+  :root{
+    --bg: #FBF6EC;
+    --panel: #FFFFFF;
+    --ink: #2B4640;
+    --muted: #4F7A70;
+    --muted-soft: #9ED1C7;
+    --gold: #DC694C;
+    --gold-soft: #FBDCCF;
+    --panel-line: #C7D6B1;
+    --danger: #B23A2E;
+    --ok: #59A898;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    min-height:100vh;
+  }
+  html{
+    background: #FBF6EC;
+  }
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    background: #FBF6EC;
+    min-height: 100vh;
+  }
+  header{
+    text-align:center;
+    margin-bottom: 22px;
+  }
+  header h1{
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+    margin: 0 0 6px;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  header p{
+    margin:0;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .tabs{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 22px;
+    justify-content:center;
+  }
+  .tab{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 9px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--panel-line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor:pointer;
+    box-shadow: 0 1px 2px rgba(58,42,28,0.08);
+  }
+  .tab.active{
+    border-color: var(--gold);
+    color: #FFFAF3;
+    background: var(--gold);
+  }
+  .badge{
+    display:inline-block;
+    background: var(--ink);
+    color: #FFF8EC;
+    font-size: 0.7rem;
+    font-weight:700;
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: 6px;
+  }
+  .tab.active .badge{
+    background: #FFFAF3;
+    color: var(--gold);
+  }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(58,42,28,0.08);
+  }
+  label{
+    display:block;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .field{ margin-bottom: 16px; }
+  textarea, input, select{
+    width:100%;
+    background: #FFFFFF;
+    border: 1px solid var(--panel-line);
+    color: var(--ink);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  textarea:focus, input:focus, select:focus{
+    outline: none;
+    border-color: var(--gold);
+  }
+  textarea{ resize: vertical; min-height: 64px; font-style: italic; }
+
+  .row2{
+    display:flex;
+    gap: 12px;
+  }
+  .row2 > div{ flex:1; }
+
+  .cat-add{
+    display:flex;
+    gap:8px;
+    margin-top: 6px;
+  }
+  .cat-add input{ flex:1; }
+  .btn-small{
+    background: var(--gold-soft);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: 6px;
+    padding: 0 14px;
+    cursor:pointer;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .btn-small:hover{ background: var(--gold); color: #FFF8EC; }
+
+  .btn-main{
+    width:100%;
+    background: var(--gold);
+    color: #FFF8EC;
+    border:none;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight:700;
+    letter-spacing: 0.5px;
+    cursor:pointer;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(189,94,46,0.3);
+  }
+  .btn-main:hover{ opacity: 0.9; }
+  .btn-main:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .backup-bar{
+    display:flex;
+    gap: 8px;
+    justify-content:flex-end;
+    margin-bottom: 12px;
+  }
+  .search-box{
+    display:block;
+    width:100%;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .filters{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .chip{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--panel-line);
+    color: var(--ink);
+    cursor:pointer;
+    background: var(--panel);
+    box-shadow: 0 1px 2px rgba(58,42,28,0.06);
+  }
+  .chip.active{
+    border-color: var(--gold);
+    color: #FFFAF3;
+    background: var(--gold);
+  }
+
+  .entry{
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-left: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(58,42,28,0.08);
+  }
+  .entry.pending{ border-left-color: var(--muted-soft); }
+  .entry .quote{
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin: 0 0 10px;
+    padding-right: 26px;
+    color: var(--ink);
+  }
+  .spelling-note{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    font-style: italic;
+    color: var(--muted-soft);
+    margin: -4px 0 10px;
+  }
+  .entry .meta{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .entry .meta .tag{
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .entry-actions{
+    position:absolute;
+    top: 10px;
+    right: 12px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .entry-actions .edit{
+    background:none;
+    border:none;
+    color: var(--muted-soft);
+    cursor:pointer;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .entry-actions .edit:hover{ color: var(--gold); }
+  .entry-actions .delete{
+    background:none;
+    border:none;
+    color: var(--muted-soft);
+    cursor:pointer;
+    font-size: 1.1rem;
+    line-height:1;
+  }
+  .entry-actions .delete:hover{ color: var(--danger); }
+
+  .edit-form{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .edit-form label{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.72rem;
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .edit-form textarea,
+  .edit-form input,
+  .edit-form select{
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 8px 10px;
+    border: 1px solid var(--panel-line);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .edit-form-actions{
+    display:flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .review-actions{
+    display:flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-approve, .btn-reject{
+    flex:1;
+    border:none;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-approve{ background: var(--ok); color: #F5FAF6; }
+  .btn-reject{ background: #FBE4DC; border: 1px solid var(--danger); color: var(--danger); }
+
+  .empty{
+    text-align:center;
+    color: var(--muted);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.9rem;
+    padding: 30px 10px;
+  }
+
+  .status{
+    text-align:center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    height: 18px;
+    margin-top: 8px;
+  }
+
+  .lock-card{
+    text-align:center;
+  }
+  .lock-card p{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0;
+  }
+  .lock-row{
+    display:flex;
+    gap:8px;
+  }
+  .signout{
+    display:block;
+    margin: 18px auto 0;
+    background:none;
+    border:none;
+    color: var(--muted);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.78rem;
+    cursor:pointer;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>"like a leaf on still water..."</h1>
+    <p>Simile Collector</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="library">Library</button>
+    <button class="tab" data-tab="add">Add a Simile</button>
+    <button class="tab" data-tab="review">Review <span class="badge" id="pendingBadge" style="display:none;">0</span></button>
+  </div>
+
+  <!-- LIBRARY VIEW -->
+  <div class="view active" id="view-library">
+    <div class="backup-bar">
+      <button class="btn-small" id="exportBtn">Download a backup</button>
+      <button class="btn-small" id="importBtn">Load a backup</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;">
+    </div>
+    <input type="text" id="searchInput" class="search-box" placeholder="Search by author, book, or category...">
+    <div class="filters" id="filters"></div>
+    <div id="list"></div>
+  </div>
+
+  <!-- ADD VIEW -->
+  <div class="view" id="view-add">
+    <div class="card">
+      <div class="field">
+        <label for="simileText">The simile</label>
+        <textarea id="simileText" placeholder="e.g. Her voice was like honey poured slowly over gravel."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="authorInput">Author</label>
+        <input id="authorInput" type="text" placeholder="e.g. Toni Morrison">
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="bookInput">Book</label>
+          <input id="bookInput" type="text" placeholder="e.g. Beloved">
+        </div>
+        <div class="field">
+          <label for="chapterInput">Chapter</label>
+          <input id="chapterInput" type="text" placeholder="e.g. Chapter 3">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="submitterInput">Your name (optional)</label>
+        <input id="submitterInput" type="text" placeholder="So the reviewer knows who sent it">
+      </div>
+
+      <div class="field">
+        <label for="categorySelect">Category</label>
+        <select id="categorySelect"></select>
+        <div class="cat-add">
+          <input id="newCategory" type="text" placeholder="Add a new category">
+          <button class="btn-small" id="addCategoryBtn">Add</button>
+        </div>
+      </div>
+
+      <button class="btn-main" id="saveBtn">Submit Simile</button>
+      <div class="status" id="status"></div>
+      <p style="font-family:Helvetica,Arial,sans-serif;font-size:0.75rem;color:#8a8880;text-align:center;margin-top:10px;">
+        Submissions are reviewed before they appear in the Library.
+      </p>
+    </div>
+  </div>
+
+  <!-- REVIEW VIEW -->
+  <div class="view" id="view-review">
+    <div class="card lock-card" id="lockCard">
+      <label for="pinInput" style="text-align:center;">Enter the review PIN</label>
+      <div class="lock-row">
+        <input id="pinInput" type="password" placeholder="PIN">
+        <button class="btn-small" id="unlockBtn">Unlock</button>
+      </div>
+      <p>Only the reviewer needs this. Default PIN is <strong>2468</strong> — tell Claude if you'd like it changed.</p>
+    </div>
+    <div id="reviewList" style="display:none;"></div>
+    <button class="signout" id="lockAgainBtn" style="display:none;">Lock review screen</button>
+  </div>
+
+</div>
+
+<script>
+const DEFAULT_CATEGORIES = ["Nature", "Emotion", "People", "Time", "Other"];
+const REVIEW_PIN = "2468";
+
+const SEED_ENTRIES = [
+  {id:"seed-001", text:"A hump like a snow-hill", author:"Herman Melville", book:"Moby-Dick", chapter:"Chapter 133", category:"Nature", status:"approved"},
+  {id:"seed-002", text:"...it made the hair on the crown of his head stand up like a tuft of feathers.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 13", category:"People", status:"approved"},
+  {id:"seed-003", text:"...carrying a basket like the Great Seal of England in plaited straw.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 13", category:"Other", status:"approved"},
+  {id:"seed-004", text:"A little dry, brown, corrugated old woman, with a small face that might have been made of walnut-shells, and a large mouth like a cat's without the whiskers.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 11", category:"People", status:"approved"},
+  {id:"seed-005", text:"Jaggers's own high-backed chair was of deadly black horse-hair, with rows of brass nails round it, like a coffin.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 20", category:"Other", status:"approved"},
+  {id:"seed-006", text:"...pulling a lock of hair in the middle of his forehead, like the Bull in Cock Robin pulling at the bell-rope.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 20", category:"People", status:"approved"},
+  {id:"seed-007", text:"...my heart will be as light as a feather.", author:"Jane Austen", book:"Pride and Prejudice", chapter:"Chapter 40", category:"Emotion", status:"approved"},
+  {id:"seed-008", text:"...as handsome as any of them", author:"Jane Austen", book:"Pride and Prejudice", chapter:"Chapter 1", category:"People", status:"approved"},
+  {id:"seed-009", text:"That nasty Jane Eyre had flown at him like a mad cat.", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 4", category:"People", status:"approved"},
+  {id:"seed-010", text:"...shabby as a miniature scarecrow", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 4", category:"Other", status:"approved"},
+  {id:"seed-011", text:"You are like a murderer—you are like a slave-driver—you are like the Roman emperors!", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 4", category:"Emotion", status:"approved"},
+  {id:"seed-012", text:"...like a carved mask", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 4", category:"People", status:"approved"},
+  {id:"seed-013", text:"A new chapter in a novel is something like a new scene in a play.", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 11", category:"Other", status:"approved"},
+  {id:"seed-014", text:"...swallowed poison as if it were nectar.", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 16", category:"Emotion", status:"approved"},
+  {id:"seed-015", text:"She worried me like a tigress, when Rochester got the knife from her.", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 20", category:"People", status:"approved"},
+  {id:"seed-016", text:"You are afraid of me, because I talk like a Sphinx.", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 14", category:"People", status:"approved"},
+  {id:"seed-017", text:"...swept me like a whirlwind into the nursery", author:"Charlotte Bronte", book:"Jane Eyre", chapter:"Chapter 4", category:"Emotion", status:"approved"},
+  {id:"seed-018", text:"...looking like a black cloud with rows of glow-worms around it... shining like red-hot teeth", author:"Mark Twain", book:"Adventures of Huckleberry Finn", chapter:"Chapter 16", category:"Nature", status:"approved"},
+  {id:"seed-019", text:"dark as sin again", author:"Mark Twain", book:"Adventures of Huckleberry Finn", chapter:"Chapter 9", category:"Nature", status:"approved"},
+  {id:"seed-020", text:"like dead people", author:"Mark Twain", book:"Adventures of Huckleberry Finn", chapter:"Chapter 13", category:"Other", status:"approved"},
+  {id:"seed-021", text:"The saintly soul of Elizabeth shone like a shrine-dedicated lamp in our peaceful home.", author:"Mary Shelley", book:"Frankenstein", chapter:"Chapter 2", category:"Emotion", status:"approved"},
+  {id:"seed-022", text:"He came like a protecting spirit to the poor girl.", author:"Mary Shelley", book:"Frankenstein", chapter:"Chapter 1", category:"People", status:"approved"},
+  {id:"seed-023", text:"I find it arise, like a mountain river, from ignoble and almost forgotten sources.", author:"Mary Shelley", book:"Frankenstein", chapter:"Chapter 2", category:"Emotion", status:"approved"},
+  {id:"seed-024", text:"We all kept as mute as mice a full half-hour.", author:"Emily Bronte", book:"Wuthering Heights", chapter:"Chapter 5", category:"People", status:"approved"},
+  {id:"seed-025", text:"Catherine's face was just like the landscape--shadows and sunshine flitting over it in rapid succession; but the shadows rested longer, and the sunshine was more transient.", author:"Emily Bronte", book:"Wuthering Heights", chapter:"Chapter 27", category:"Emotion", status:"approved"},
+  {id:"seed-026", text:"She bounded before me, and returned to my side, and was off again like a young greyhound.", author:"Emily Bronte", book:"Wuthering Heights", chapter:"Chapter 21", category:"People", status:"approved"},
+  {id:"seed-027", text:"...her bright cheek as soft and pure in its bloom as a wild rose.", author:"Emily Bronte", book:"Wuthering Heights", chapter:"Chapter 21", category:"Nature", status:"approved"},
+  {id:"seed-028", text:"...her neck would bend about easily in any direction, like a serpent.", author:"Lewis Carroll", book:"Alice's Adventures in Wonderland", chapter:"Chapter 5", category:"People", status:"approved"},
+  {id:"seed-029", text:"...something comes at me like a Jack-in-the-box, and up I goes like a sky-rocket!", author:"Lewis Carroll", book:"Alice's Adventures in Wonderland", chapter:"Chapter 4", category:"Other", status:"approved"},
+  {id:"seed-030", text:"Hard and sharp as flint, from which no steel had ever struck out generous fire; secret, and self-contained, and solitary as an oyster.", author:"Charles Dickens", book:"A Christmas Carol", chapter:"Stave One", category:"People", status:"approved"},
+  {id:"seed-031", text:"Old Marley was as dead as a door-nail.", author:"Charles Dickens", book:"A Christmas Carol", chapter:"Stave One", category:"Other", status:"approved"},
+  {id:"seed-032", text:"Everyone scattered like leaves before a gust of wind.", author:"Louisa May Alcott", book:"Little Women", chapter:"Chapter 15", category:"Nature", status:"approved"},
+  {id:"seed-033", text:"...the kitten which had scrambled up her back and stuck like a burr just out of reach.", author:"Louisa May Alcott", book:"Little Women", chapter:"Chapter 4", category:"Other", status:"approved"},
+  {id:"seed-034", text:"It was about nine miles long and five across, shaped, you might say, like a fat dragon standing up.", author:"Robert Louis Stevenson", book:"Treasure Island", chapter:"Chapter 6", category:"Other", status:"approved"},
+  {id:"seed-035", text:"...nearly every variety of money in the world must, I think, have found a place in that collection; and for number, I am sure they were like autumn leaves.", author:"Robert Louis Stevenson", book:"Treasure Island", chapter:"Chapter 34", category:"Nature", status:"approved"},
+  {id:"seed-036", text:"He made no motion of stepping to meet me, but stood like a statue, as though his gesture of welcome had fixed him into stone.", author:"Bram Stoker", book:"Dracula", chapter:"Chapter 2", category:"People", status:"approved"},
+  {id:"seed-037", text:"...move downwards with considerable speed, just as a lizard moves along a wall.", author:"Bram Stoker", book:"Dracula", chapter:"Chapter 3", category:"People", status:"approved"},
+  {id:"seed-038", text:"Here and there a wild plum leaned out from the bank like a white-clad girl tip-toeing to her own reflection.", author:"L.M. Montgomery", book:"Anne of Green Gables", chapter:"Chapter 2", category:"Nature", status:"approved"},
+  {id:"seed-039", text:"...the sombre shadows thrown by the trees upon the ground, looked sepulchral and death-like, from being so still.", author:"Charles Dickens", book:"Oliver Twist", chapter:"Chapter 7", category:"Nature", status:"approved"},
+  {id:"seed-040", text:"The seeds Dickon and Mary had planted grew as if fairies had tended them.", author:"Frances Hodgson Burnett", book:"The Secret Garden", chapter:"Chapter 23", category:"Nature", status:"approved"},
+  {id:"seed-041", text:"Leaning back in the cab, this amateur bloodhound carolled away like a lark.", author:"Arthur Conan Doyle", book:"A Study in Scarlet", chapter:"Part 1, Chapter 4", category:"People", status:"approved"},
+  {id:"seed-042", text:"The only sound I hear is like a tinkle of bells.", author:"J.M. Barrie", book:"Peter and Wendy", chapter:"Chapter 3", category:"Other", status:"approved"},
+  {id:"seed-043", text:"Foolish Tootles was standing like a conqueror over Wendy's body.", author:"J.M. Barrie", book:"Peter and Wendy", chapter:"Chapter 6", category:"People", status:"approved"},
+  {id:"seed-044", text:"Dorothy felt as if she were going up in a balloon.", author:"L. Frank Baum", book:"The Wonderful Wizard of Oz", chapter:"Chapter 1", category:"Emotion", status:"approved"},
+  {id:"seed-045", text:"...she felt as if she were being rocked gently, like a baby in a cradle.", author:"L. Frank Baum", book:"The Wonderful Wizard of Oz", chapter:"Chapter 1", category:"Emotion", status:"approved"},
+  {id:"seed-046", text:"I had not a dry hair on my body, the water ran down my legs, and I steamed all over--Joe used to say, like a pot on the fire.", author:"Anna Sewell", book:"Black Beauty", chapter:"Chapter 18", category:"Other", status:"approved"},
+  {id:"seed-047", text:"Mother Wolf shook herself clear of the cubs and sprang forward, her eyes, like two green moons in the darkness, facing the blazing eyes of Shere Khan.", author:"Rudyard Kipling", book:"The Jungle Book", chapter:"Mowgli's Brothers", category:"Nature", status:"approved"},
+  {id:"seed-048", text:"The dim roar of London was like the bourdon note of a distant organ.", author:"Oscar Wilde", book:"The Picture of Dorian Gray", chapter:"Chapter 1", category:"Other", status:"approved"},
+  {id:"seed-049", text:"He seemed to weave, like the spider, from pure impulse, without reflection.", author:"George Eliot", book:"Silas Marner", chapter:"Chapter 2", category:"People", status:"approved"},
+  {id:"seed-050", text:"I liv'd just like a man cast away upon some desolate island, that had no body there but himself.", author:"Daniel Defoe", book:"Robinson Crusoe", chapter:"Chapter 4", category:"Emotion", status:"approved"},
+  {id:"seed-051", text:"...put the sharp end of his half-pike a good way up into my left nostril, which tickled my nose like a straw, and made me sneeze violently.", author:"Jonathan Swift", book:"Gulliver's Travels", chapter:"Part 1, Chapter 1", category:"Other", status:"approved"},
+  {id:"seed-052", text:"...they brought a cold blast of air into the house which blew away the old familiar feeling like a feather.", author:"Charles Dickens", book:"David Copperfield", chapter:"Chapter 8", category:"Emotion", status:"approved"},
+  {id:"seed-053", text:"...I could have been content to have capitulated for spending the rest of my time there, even to the last moment, till I had laid me down and dy'd, like the old goat in the cave.", author:"Daniel Defoe", book:"Robinson Crusoe", chapter:"Chapter 16", category:"People", status:"approved"},
+  {id:"seed-054", text:"Like a lurking reptile it leaped up at me as she eagerly bent forward towards the place in which I was sitting.", author:"Wilkie Collins", book:"The Woman in White", chapter:"Third Epoch, Part VIII", category:"People", status:"approved"},
+  {id:"seed-055", text:"Miss Jenkyns wore a cravat, and a little bonnet like a jockey-cap, and altogether had the appearance of a strong-minded woman.", author:"Elizabeth Gaskell", book:"Cranford", chapter:"Chapter 2", category:"People", status:"approved"},
+  {id:"seed-056", text:"...in an instant she was on the watch, with gleaming eyes, like a Skye terrier suspecting mischief.", author:"George Eliot", book:"The Mill on the Floss", chapter:"Book 1, Chapter 3", category:"People", status:"approved"},
+  {id:"seed-057", text:"By the side of many tall and bouncing young ladies in the establishment, Rebecca Sharp looked like a child.", author:"William Makepeace Thackeray", book:"Vanity Fair", chapter:"Chapter 2", category:"People", status:"approved"},
+  {id:"seed-058", text:"They were big and warm and full of light, like the sun shining on brown pools in the wood.", author:"Willa Cather", book:"My Antonia", chapter:"Book 1, Chapter 3", category:"People", status:"approved"},
+  {id:"seed-059", text:"Human kindness was like a sun shining upon him, and he flourished like a flower planted in good soil.", author:"Jack London", book:"White Fang", chapter:"Part 5, Chapter 4", category:"Nature", status:"approved"},
+  {id:"seed-060", text:"In a sky of iron the points of the Dipper hung like icicles and Orion flashed his cold fires.", author:"Edith Wharton", book:"Ethan Frome", chapter:"Chapter 1", category:"Nature", status:"approved"},
+  {id:"seed-061", text:"Camp fires, like red, peculiar blossoms, dotted the night.", author:"Stephen Crane", book:"The Red Badge of Courage", chapter:"Chapter 1", category:"Nature", status:"approved"},
+  {id:"seed-062", text:"But that night she was like the little tottering, stumbling, clutching child, who of a sudden realizes its powers, and walks for the first time alone, boldly and with over-confidence.", author:"Kate Chopin", book:"The Awakening", chapter:"Chapter 10", category:"Emotion", status:"approved"},
+  {id:"seed-063", text:"Thee't like thy dog Gyp--thee bark'st at me sometimes, but thee allays lick'st my hand after.", author:"George Eliot", book:"Adam Bede", chapter:"Chapter 1", category:"People", status:"approved"},
+  {id:"seed-064", text:"He was like a traveller so grateful for rescue from a dangerous accident that at first he is hardly conscious of his bruises.", author:"Edith Wharton", book:"The House of Mirth", chapter:"Book 2, Chapter 1", category:"People", status:"approved"},
+  {id:"seed-065", text:"...the effect was that of two dancing points of light, two little yellow bubbles, such as rise in a glass of champagne.", author:"Willa Cather", book:"O Pioneers!", chapter:"Part 2, Chapter 6", category:"People", status:"approved"},
+  {id:"seed-066", text:"...it was no use to try to do anything else than let them stay like water on a blue flower or let them fall over her cheeks.", author:"George Eliot", book:"Middlemarch", chapter:"Chapter 31", category:"Emotion", status:"approved"},
+  {id:"seed-067", text:"...my hair, which, till a late period, withstood the frosts of time, lies now, at last white, under a white cap, like snow beneath snow.", author:"Charlotte Bronte", book:"Villette", chapter:"Chapter 5", category:"People", status:"approved"},
+  {id:"seed-068", text:"Almost, he was like her knight who wore her favour in the battle.", author:"D.H. Lawrence", book:"Sons and Lovers", chapter:"Part 1, Chapter 4", category:"People", status:"approved"},
+  {id:"seed-069", text:"You are like the infant Hannibal.", author:"Henry James", book:"Daisy Miller", chapter:"Part II", category:"People", status:"approved"},
+  {id:"seed-070", text:"She had long, drooping eyelashes, a little pursed-up mouth, and narrow, pointed teeth, like a squirrel's.", author:"Willa Cather", book:"The Song of the Lark", chapter:"Part 1, Chapter 8", category:"People", status:"approved"},
+  {id:"seed-071", text:"Letting 'I dare not' wait upon 'I would,' Like the poor cat i' th' adage?", author:"William Shakespeare", book:"Macbeth", chapter:"Act 1, Scene 7", category:"People", status:"approved"},
+  {id:"seed-072", text:"Why, man, he doth bestride the narrow world Like a Colossus, and we petty men Walk under his huge legs.", author:"William Shakespeare", book:"Julius Caesar", chapter:"Act 1, Scene 2", category:"People", status:"approved"},
+  {id:"seed-073", text:"She never told her love, But let concealment, like a worm i' th' bud, Feed on her damask cheek.", author:"William Shakespeare", book:"Twelfth Night", chapter:"Act 2, Scene 4", category:"Emotion", status:"approved"},
+  {id:"seed-074", text:"Of one whose hand, Like the base Indian, threw a pearl away Richer than all his tribe.", author:"William Shakespeare", book:"Othello", chapter:"Act 5, Scene 2", category:"Emotion", status:"approved"},
+  {id:"seed-075", text:"And then the lover, Sighing like furnace, with a woeful ballad Made to his mistress' eyebrow.", author:"William Shakespeare", book:"As You Like It", chapter:"Act 2, Scene 7", category:"Emotion", status:"approved"},
+  {id:"seed-076", text:"Then the whining school-boy, with his satchel And shining morning face, creeping like snail Unwillingly to school.", author:"William Shakespeare", book:"As You Like It", chapter:"Act 2, Scene 7", category:"People", status:"approved"},
+  {id:"seed-077", text:"Be thou as chaste as ice, as pure as snow, thou shalt not escape calumny.", author:"William Shakespeare", book:"Hamlet", chapter:"Act 3, Scene 1", category:"Nature", status:"approved"},
+  {id:"seed-078", text:"It seems she hangs upon the cheek of night As a rich jewel in an Ethiop's ear.", author:"William Shakespeare", book:"Romeo and Juliet", chapter:"Act 1, Scene 5", category:"People", status:"approved"},
+  {id:"seed-079", text:"My bounty is as boundless as the sea, My love as deep; the more I give to thee, The more I have, for both are infinite.", author:"William Shakespeare", book:"Romeo and Juliet", chapter:"Act 2, Scene 2", category:"Emotion", status:"approved"},
+  {id:"seed-080", text:"Making it momentany as a sound, Swift as a shadow, short as any dream.", author:"William Shakespeare", book:"A Midsummer Night's Dream", chapter:"Act 1, Scene 1", category:"Time", status:"approved"},
+  {id:"seed-081", text:"...each diamond on her neck gave a sinister wink like a toad's.", author:"Thomas Hardy", book:"Tess of the d'Urbervilles", chapter:"Chapter 34", category:"Other", status:"approved"},
+  {id:"seed-082", text:"In juxtaposition with Troy, Oak had a melancholy tendency to look like a candle beside gas.", author:"Thomas Hardy", book:"Far from the Madding Crowd", chapter:"Chapter 36", category:"People", status:"approved"},
+  {id:"seed-083", text:"...a row of tall, varnished case-clocks...joined in one after another...like a row of actors delivering their final speeches before the fall of the curtain.", author:"Thomas Hardy", book:"The Mayor of Casterbridge", chapter:"Chapter 4", category:"Time", status:"approved"},
+  {id:"seed-084", text:"...it is like a running blaze on a plain, like a flash of lightning in the clouds.", author:"Joseph Conrad", book:"Heart of Darkness", chapter:"Chapter 1", category:"Nature", status:"approved"},
+  {id:"seed-085", text:"...a writhing horror twisted itself across his features, like a snake gliding swiftly over them.", author:"Nathaniel Hawthorne", book:"The Scarlet Letter", chapter:"Chapter 3", category:"Emotion", status:"approved"},
+  {id:"seed-086", text:"...said Marks, thrusting out a long, thin hand, like a raven's claw.", author:"Harriet Beecher Stowe", book:"Uncle Tom's Cabin", chapter:"Chapter 8", category:"People", status:"approved"},
+  {id:"seed-087", text:"It turns me cold to think of this creature stealing like a thief to Harry's bedside.", author:"Robert Louis Stevenson", book:"The Strange Case of Dr Jekyll and Mr Hyde", chapter:"Chapter 2", category:"Emotion", status:"approved"},
+  {id:"seed-088", text:"Baskerville shuddered as he looked up the long, dark drive to where the house glimmered like a ghost at the farther end.", author:"Arthur Conan Doyle", book:"The Hound of the Baskervilles", chapter:"Chapter 6", category:"Other", status:"approved"},
+  {id:"seed-089", text:"...Jude followed her like a pet lamb till she slackened her pace and walked beside him.", author:"Thomas Hardy", book:"Jude the Obscure", chapter:"Part 1, Chapter 8", category:"People", status:"approved"}
+];
+
+
+let categories = [...DEFAULT_CATEGORIES];
+let entries = []; // {id, text, author, chapter, category, submitter, status: 'pending'|'approved'}
+let activeFilter = "All";
+let unlocked = false;
+
+const $ = (id) => document.getElementById(id);
+
+function showStatus(msg){
+  const el = $("status");
+  el.textContent = msg;
+  setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2000);
+}
+
+const usingSyncStorage = typeof window.storage !== "undefined";
+
+async function storageGet(key){
+  if(usingSyncStorage){
+    const res = await window.storage.get(key, true);
+    return res && res.value ? res.value : null;
+  }
+  return localStorage.getItem(key);
+}
+
+async function storageSet(key, value){
+  if(usingSyncStorage){
+    await window.storage.set(key, value, true);
+  } else {
+    localStorage.setItem(key, value);
+  }
+}
+
+async function loadData(){
+  try{
+    const saved = await storageGet("simile-categories");
+    if(saved){
+      const parsed = JSON.parse(saved);
+      categories = Array.from(new Set([...DEFAULT_CATEGORIES, ...parsed]));
+    }
+  }catch(e){ /* none saved yet */ }
+
+  try{
+    const saved = await storageGet("simile-entries");
+    if(saved){
+      entries = JSON.parse(saved);
+    }
+  }catch(e){ entries = []; }
+
+  let changedSeed = false;
+  SEED_ENTRIES.forEach(seed => {
+    const idx = entries.findIndex(e => e.id === seed.id);
+    if(idx === -1){
+      const dupeByText = entries.some(e => e.text === seed.text && e.id.indexOf("seed-") !== 0);
+      if(!dupeByText){
+        entries.push(seed);
+        changedSeed = true;
+      }
+    } else if(JSON.stringify(entries[idx]) !== JSON.stringify(seed)){
+      entries[idx] = seed;
+      changedSeed = true;
+    }
+  });
+  if(changedSeed){
+    await saveEntries();
+  }
+
+  renderCategorySelect();
+  renderFilters();
+  renderLibrary();
+  updateBadge();
+  if(unlocked) renderReview();
+}
+
+async function saveCategories(){
+  try{
+    await storageSet("simile-categories", JSON.stringify(categories));
+  }catch(e){ showStatus("Couldn't save category"); }
+}
+
+async function saveEntries(){
+  try{
+    await storageSet("simile-entries", JSON.stringify(entries));
+  }catch(e){ showStatus("Couldn't save — try again"); }
+}
+
+function renderCategorySelect(){
+  const sel = $("categorySelect");
+  sel.innerHTML = "";
+  categories.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
+function renderFilters(){
+  const wrap = $("filters");
+  wrap.innerHTML = "";
+  wrap.appendChild(makeChip("All"));
+  categories.forEach(c=> wrap.appendChild(makeChip(c)));
+}
+
+function makeChip(name){
+  const b = document.createElement("button");
+  b.className = "chip" + (activeFilter === name ? " active" : "");
+  b.textContent = name;
+  b.onclick = ()=>{ activeFilter = name; renderFilters(); renderLibrary(); };
+  return b;
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function renderLibrary(){
+  const list = $("list");
+  list.innerHTML = "";
+  const approved = entries.filter(e => e.status === "approved");
+  const searchTerm = ($("searchInput").value || "").toLowerCase().trim();
+  const shown = approved.filter(e => {
+    const matchesFilter = activeFilter === "All" || e.category === activeFilter;
+    if(!matchesFilter) return false;
+    if(!searchTerm) return true;
+    return (e.author || "").toLowerCase().includes(searchTerm)
+      || (e.book || "").toLowerCase().includes(searchTerm)
+      || (e.category || "").toLowerCase().includes(searchTerm);
+  });
+
+  if(shown.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = searchTerm
+      ? "No similes match that search."
+      : (approved.length === 0
+        ? "No approved similes yet. Add one, or wait for submissions to be reviewed."
+        : "Nothing approved in this category yet.");
+    list.appendChild(empty);
+    return;
+  }
+
+  shown.slice().reverse().forEach(entry=>{
+    const div = document.createElement("div");
+    div.className = "entry";
+    const sourceBits = [];
+    if(entry.author) sourceBits.push(entry.author);
+    if(entry.book) sourceBits.push(entry.book);
+    if(entry.chapter) sourceBits.push(entry.chapter);
+    const sourceText = sourceBits.length ? sourceBits.join(" · ") : "Unknown source";
+    const spellingNote = entry.author === "William Shakespeare"
+      ? `<p class="spelling-note">Spelling as in the original text</p>`
+      : "";
+
+    div.innerHTML = `
+      <div class="entry-actions">
+        <button class="edit" title="Edit this simile">Edit</button>
+        <button class="delete" title="Delete this simile">&times;</button>
+      </div>
+      <p class="quote">${escapeHtml(entry.text)}</p>
+      ${spellingNote}
+      <div class="meta">
+        <span class="source">${escapeHtml(sourceText)}</span>
+        <span class="tag">${escapeHtml(entry.category)}</span>
+      </div>
+    `;
+    div.querySelector(".delete").onclick = ()=> deleteEntry(entry.id);
+    div.querySelector(".edit").onclick = ()=> renderEditForm(div, entry);
+    list.appendChild(div);
+  });
+}
+
+function renderEditForm(div, entry){
+  div.innerHTML = `
+    <div class="edit-form">
+      <label>Simile text</label>
+      <textarea class="edit-text" rows="3">${escapeHtml(entry.text)}</textarea>
+      <label>Author</label>
+      <input class="edit-author" value="${escapeHtml(entry.author || "")}">
+      <label>Book</label>
+      <input class="edit-book" value="${escapeHtml(entry.book || "")}">
+      <label>Chapter</label>
+      <input class="edit-chapter" value="${escapeHtml(entry.chapter || "")}">
+      <label>Category</label>
+      <select class="edit-category">
+        ${categories.map(c => `<option value="${escapeHtml(c)}" ${c === entry.category ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
+      </select>
+      <div class="edit-form-actions">
+        <button class="btn-small edit-save">Save changes</button>
+        <button class="btn-small edit-cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+  div.querySelector(".edit-save").onclick = async ()=>{
+    const text = div.querySelector(".edit-text").value.trim();
+    const author = div.querySelector(".edit-author").value.trim();
+    const book = div.querySelector(".edit-book").value.trim();
+    const chapter = div.querySelector(".edit-chapter").value.trim();
+    const category = div.querySelector(".edit-category").value;
+    if(!text || !author || !book || !chapter){
+      showStatus("All fields except submitter are required");
+      return;
+    }
+    entries = entries.map(e => e.id === entry.id ? {...e, text, author, book, chapter, category} : e);
+    await saveEntries();
+    renderLibrary();
+    showStatus("Simile updated");
+  };
+  div.querySelector(".edit-cancel").onclick = ()=> renderLibrary();
+}
+
+function updateBadge(){
+  const pendingCount = entries.filter(e=>e.status === "pending").length;
+  const badge = $("pendingBadge");
+  if(pendingCount > 0){
+    badge.style.display = "inline-block";
+    badge.textContent = pendingCount;
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function renderReview(){
+  const wrap = $("reviewList");
+  wrap.innerHTML = "";
+  const pending = entries.filter(e => e.status === "pending");
+
+  if(pending.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No submissions waiting for review.";
+    wrap.appendChild(empty);
+    return;
+  }
+
+  pending.slice().reverse().forEach(entry=>{
+    const div = document.createElement("div");
+    div.className = "entry pending";
+    const sourceBits = [];
+    if(entry.author) sourceBits.push(entry.author);
+    if(entry.book) sourceBits.push(entry.book);
+    if(entry.chapter) sourceBits.push(entry.chapter);
+    const sourceText = sourceBits.length ? sourceBits.join(" · ") : "Unknown source";
+    const submittedBy = entry.submitter ? `Submitted by ${entry.submitter}` : "Submitted anonymously";
+
+    div.innerHTML = `
+      <p class="quote">${escapeHtml(entry.text)}</p>
+      <div class="meta">
+        <span class="source">${escapeHtml(sourceText)}</span>
+        <span class="tag">${escapeHtml(entry.category)}</span>
+      </div>
+      <div class="meta"><span>${escapeHtml(submittedBy)}</span></div>
+      <div class="review-actions">
+        <button class="btn-approve">Approve</button>
+        <button class="btn-reject">Reject</button>
+      </div>
+    `;
+    div.querySelector(".btn-approve").onclick = ()=> reviewEntry(entry.id, "approved");
+    div.querySelector(".btn-reject").onclick = ()=> reviewEntry(entry.id, "rejected");
+    wrap.appendChild(div);
+  });
+}
+
+async function reviewEntry(id, decision){
+  if(decision === "rejected"){
+    entries = entries.filter(e => e.id !== id);
+  } else {
+    entries = entries.map(e => e.id === id ? {...e, status:"approved"} : e);
+  }
+  await saveEntries();
+  renderReview();
+  renderLibrary();
+  updateBadge();
+}
+
+async function deleteEntry(id){
+  entries = entries.filter(e=>e.id !== id);
+  await saveEntries();
+  renderLibrary();
+  showStatus("Deleted");
+}
+
+function normalizeForCompare(str){
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function textSimilarity(a, b){
+  // Simple word-overlap similarity, good enough for catching near-duplicate submissions
+  const wordsA = new Set(a.split(" ").filter(Boolean));
+  const wordsB = new Set(b.split(" ").filter(Boolean));
+  if(wordsA.size === 0 || wordsB.size === 0) return 0;
+  let shared = 0;
+  wordsA.forEach(w => { if(wordsB.has(w)) shared++; });
+  const union = new Set([...wordsA, ...wordsB]).size;
+  return shared / union;
+}
+
+function findDuplicate(newText){
+  const normalizedNew = normalizeForCompare(newText);
+  for(const e of entries){
+    if(e.status === "rejected") continue;
+    const normalizedExisting = normalizeForCompare(e.text);
+    if(normalizedExisting === normalizedNew){
+      return e;
+    }
+    if(textSimilarity(normalizedNew, normalizedExisting) >= 0.82){
+      return e;
+    }
+  }
+  return null;
+}
+
+$("saveBtn").onclick = async ()=>{
+  const text = $("simileText").value.trim();
+  const author = $("authorInput").value.trim();
+  const book = $("bookInput").value.trim();
+  const chapter = $("chapterInput").value.trim();
+
+  if(!text){
+    showStatus("Write a simile first");
+    return;
+  }
+  if(!author || !book || !chapter){
+    showStatus("Author, book, and chapter are all required");
+    return;
+  }
+
+  const dupe = findDuplicate(text);
+  if(dupe){
+    showStatus(`Looks like this is already in the collection (${dupe.book}) — not submitted`);
+    return;
+  }
+
+  const entry = {
+    id: Date.now().toString(),
+    text,
+    author,
+    book,
+    chapter,
+    submitter: $("submitterInput").value.trim(),
+    category: $("categorySelect").value,
+    status: "pending"
+  };
+  entries.push(entry);
+  await saveEntries();
+
+  $("simileText").value = "";
+  $("authorInput").value = "";
+  $("bookInput").value = "";
+  $("chapterInput").value = "";
+  $("submitterInput").value = "";
+
+  updateBadge();
+  showStatus("Submitted for review");
+};
+
+
+$("addCategoryBtn").onclick = async ()=>{
+  const val = $("newCategory").value.trim();
+  if(!val) return;
+  if(categories.some(c => c.toLowerCase() === val.toLowerCase())){
+    showStatus("That category already exists");
+    return;
+  }
+  categories.push(val);
+  await saveCategories();
+  renderCategorySelect();
+  $("categorySelect").value = val;
+  renderFilters();
+  $("newCategory").value = "";
+  showStatus("Category added");
+};
+
+// Tabs
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.onclick = ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    tab.classList.add("active");
+    $("view-" + tab.dataset.tab).classList.add("active");
+    if(tab.dataset.tab === "library") renderLibrary();
+    if(tab.dataset.tab === "review" && unlocked) renderReview();
+  };
+});
+
+// Review lock
+$("unlockBtn").onclick = ()=>{
+  if($("pinInput").value === REVIEW_PIN){
+    unlocked = true;
+    $("lockCard").style.display = "none";
+    $("reviewList").style.display = "block";
+    $("lockAgainBtn").style.display = "block";
+    renderReview();
+  } else {
+    showStatus("");
+    $("pinInput").value = "";
+    $("pinInput").placeholder = "Wrong PIN, try again";
+  }
+};
+$("lockAgainBtn").onclick = ()=>{
+  unlocked = false;
+  $("lockCard").style.display = "block";
+  $("reviewList").style.display = "none";
+  $("lockAgainBtn").style.display = "none";
+  $("pinInput").value = "";
+};
+
+$("exportBtn").onclick = ()=>{
+  const backup = {
+    categories: categories,
+    entries: entries,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const today = new Date().toISOString().slice(0,10);
+  a.download = `simile-collector-backup-${today}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus("Backup downloaded");
+};
+
+$("importBtn").onclick = ()=> $("importFile").click();
+
+$("importFile").onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (evt)=>{
+    try{
+      const backup = JSON.parse(evt.target.result);
+      if(backup.entries){
+        entries = backup.entries;
+        await saveEntries();
+      }
+      if(backup.categories){
+        categories = Array.from(new Set([...DEFAULT_CATEGORIES, ...backup.categories]));
+        await saveCategories();
+      }
+      renderCategorySelect();
+      renderFilters();
+      renderLibrary();
+      updateBadge();
+      if(unlocked) renderReview();
+      showStatus("Backup loaded");
+    }catch(err){
+      showStatus("That file didn't look like a valid backup");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+};
+
+$("searchInput").oninput = ()=> renderLibrary();
+
+loadData();
+</script>
+</body>
+</html>
