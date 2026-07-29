@@ -608,29 +608,34 @@ function showSetupBanner(id){
 
 async function storageGet(key){
   const id = await ensureBlob();
-  try{
-    const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
-    if(!res.ok) return null;
-    const data = await res.json();
-    return data[key] || null;
-  }catch(e){ return null; }
+  const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+  if(!res.ok) throw new Error("Shared storage request failed");
+  const data = await res.json();
+  return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null;
 }
 
 async function storageSet(key, value){
   const id = await ensureBlob();
-  try{
-    const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
-    const current = getRes.ok ? await getRes.json() : {};
-    current[key] = value;
-    await fetch(`${BLOB_API}/${id}`, {
-      method: "PUT",
-      headers: {"Content-Type": "application/json", "Accept": "application/json"},
-      body: JSON.stringify(current)
-    });
-  }catch(e){ showStatus("Couldn't save — check your connection"); }
+  const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+  if(!getRes.ok){
+    // Don't guess at the rest of the data — abort rather than risk overwriting it
+    throw new Error("Couldn't read current shared data before saving");
+  }
+  const current = await getRes.json();
+  current[key] = value;
+  const putRes = await fetch(`${BLOB_API}/${id}`, {
+    method: "PUT",
+    headers: {"Content-Type": "application/json", "Accept": "application/json"},
+    body: JSON.stringify(current)
+  });
+  if(!putRes.ok){
+    throw new Error("Save request failed");
+  }
 }
 
 async function loadData(){
+  let entriesLoadedOK = false;
+
   try{
     const saved = await storageGet("simile-categories");
     if(saved){
@@ -641,27 +646,35 @@ async function loadData(){
 
   try{
     const saved = await storageGet("simile-entries");
-    if(saved){
+    if(saved !== null && saved !== undefined){
       entries = JSON.parse(saved);
+      entriesLoadedOK = true;
     }
-  }catch(e){ entries = []; }
+  }catch(e){
+    entriesLoadedOK = false;
+    showStatus("Couldn't reach shared storage — showing what's saved on this device for now");
+  }
 
-  let changedSeed = false;
-  SEED_ENTRIES.forEach(seed => {
-    const idx = entries.findIndex(e => e.id === seed.id);
-    if(idx === -1){
-      const dupeByText = entries.some(e => e.text === seed.text && e.id.indexOf("seed-") !== 0);
-      if(!dupeByText){
-        entries.push(seed);
+  // Safety check: never let a failed or suspicious load wipe out real data.
+  // Only merge in seeds and save back when the load genuinely succeeded.
+  if(entriesLoadedOK){
+    let changedSeed = false;
+    SEED_ENTRIES.forEach(seed => {
+      const idx = entries.findIndex(e => e.id === seed.id);
+      if(idx === -1){
+        const dupeByText = entries.some(e => e.text === seed.text && e.id.indexOf("seed-") !== 0);
+        if(!dupeByText){
+          entries.push(seed);
+          changedSeed = true;
+        }
+      } else if(JSON.stringify(entries[idx]) !== JSON.stringify(seed)){
+        entries[idx] = seed;
         changedSeed = true;
       }
-    } else if(JSON.stringify(entries[idx]) !== JSON.stringify(seed)){
-      entries[idx] = seed;
-      changedSeed = true;
+    });
+    if(changedSeed){
+      await saveEntries();
     }
-  });
-  if(changedSeed){
-    await saveEntries();
   }
 
   renderCategorySelect();
