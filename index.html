@@ -606,29 +606,41 @@ function showSetupBanner(id){
   document.body.prepend(banner);
 }
 
-async function storageGet(key){
+let blobCache = null; // holds all shared data in memory after the first fetch
+
+async function fetchBlob(){
   const id = await ensureBlob();
   const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}, cache: "no-store"});
+  if(res.status === 429){
+    throw new Error("RATE_LIMITED");
+  }
   if(!res.ok) throw new Error("Shared storage request failed");
-  const data = await res.json();
-  return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null;
+  return await res.json();
+}
+
+async function storageGet(key){
+  if(blobCache === null){
+    blobCache = await fetchBlob();
+  }
+  return Object.prototype.hasOwnProperty.call(blobCache, key) ? blobCache[key] : null;
 }
 
 async function storageSet(key, value){
-  const id = await ensureBlob();
-  const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}, cache: "no-store"});
-  if(!getRes.ok){
-    // Don't guess at the rest of the data — abort rather than risk overwriting it
-    throw new Error("Couldn't read current shared data before saving");
+  if(blobCache === null){
+    // Only fetch first if we don't already have a working copy in memory
+    blobCache = await fetchBlob();
   }
-  const current = await getRes.json();
-  current[key] = value;
+  const id = await ensureBlob();
+  blobCache[key] = value;
   const putRes = await fetch(`${BLOB_API}/${id}`, {
     method: "PUT",
     cache: "no-store",
     headers: {"Content-Type": "application/json", "Accept": "application/json"},
-    body: JSON.stringify(current)
+    body: JSON.stringify(blobCache)
   });
+  if(putRes.status === 429){
+    throw new Error("RATE_LIMITED");
+  }
   if(!putRes.ok){
     throw new Error("Save request failed");
   }
@@ -653,7 +665,11 @@ async function loadData(){
     }
   }catch(e){
     entriesLoadedOK = false;
-    showStatus("Couldn't reach shared storage — showing what's saved on this device for now");
+    if(e.message === "RATE_LIMITED"){
+      showStatus("Shared storage is briefly busy — wait a minute and refresh");
+    } else {
+      showStatus("Couldn't reach shared storage — showing what's saved on this device for now");
+    }
   }
 
   // Safety check: never let a failed or suspicious load wipe out real data.
@@ -688,13 +704,17 @@ async function loadData(){
 async function saveCategories(){
   try{
     await storageSet("simile-categories", JSON.stringify(categories));
-  }catch(e){ showStatus("Couldn't save category"); }
+  }catch(e){
+    showStatus(e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again" : "Couldn't save category");
+  }
 }
 
 async function saveEntries(){
   try{
     await storageSet("simile-entries", JSON.stringify(entries));
-  }catch(e){ showStatus("Couldn't save — try again"); }
+  }catch(e){
+    showStatus(e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again" : "Couldn't save — try again");
+  }
 }
 
 function renderCategorySelect(){
