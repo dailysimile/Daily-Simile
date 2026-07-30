@@ -608,7 +608,7 @@ function showSetupBanner(id){
 
 async function storageGet(key){
   const id = await ensureBlob();
-  const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+  const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}, cache: "no-store"});
   if(!res.ok) throw new Error("Shared storage request failed");
   const data = await res.json();
   return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null;
@@ -616,7 +616,7 @@ async function storageGet(key){
 
 async function storageSet(key, value){
   const id = await ensureBlob();
-  const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}});
+  const getRes = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}, cache: "no-store"});
   if(!getRes.ok){
     // Don't guess at the rest of the data — abort rather than risk overwriting it
     throw new Error("Couldn't read current shared data before saving");
@@ -625,6 +625,7 @@ async function storageSet(key, value){
   current[key] = value;
   const putRes = await fetch(`${BLOB_API}/${id}`, {
     method: "PUT",
+    cache: "no-store",
     headers: {"Content-Type": "application/json", "Accept": "application/json"},
     body: JSON.stringify(current)
   });
