@@ -614,47 +614,45 @@ function showStatus(msg){
   setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2000);
 }
 
-// SHARED_BLOB_ID: once set, every visitor (any device, anywhere) reads and writes
-// the same shared data. Left blank until the one-time setup step creates it.
-const SHARED_BLOB_ID = "019fb00c-891a-781b-ae16-14ce38b9ce61";
-const BLOB_API = "https://jsonblob.com/api/jsonBlob";
-let blobId = SHARED_BLOB_ID;
-
-async function ensureBlob(){
-  if(blobId) return blobId;
-  // First time ever running: create the shared storage spot and show the ID
-  const initial = {
-    "simile-categories": JSON.stringify(DEFAULT_CATEGORIES),
-    "simile-entries": JSON.stringify([])
-  };
-  const res = await fetch(BLOB_API, {
-    method: "POST",
-    headers: {"Content-Type": "application/json", "Accept": "application/json"},
-    body: JSON.stringify(initial)
-  });
-  const location = res.headers.get("Location") || "";
-  blobId = location.split("/").pop();
-  showSetupBanner(blobId);
-  return blobId;
-}
-
-function showSetupBanner(id){
-  const banner = document.createElement("div");
-  banner.style.cssText = "position:fixed;top:0;left:0;right:0;background:#2B4640;color:#fff;padding:16px;text-align:center;z-index:9999;font-family:Helvetica,Arial,sans-serif;";
-  banner.innerHTML = `<strong>One-time setup needed!</strong> Send this code to Claude: <code style="background:#fff;color:#2B4640;padding:2px 8px;border-radius:4px;">${id}</code>`;
-  document.body.prepend(banner);
-}
+// Shared storage now lives inside this GitHub repo itself, as a file called
+// data.json. GITHUB_TOKEN is a placeholder — replace the text below with
+// your real token directly in GitHub's file editor before uploading,
+// never here in chat.
+const GITHUB_TOKEN = "PASTE_YOUR_TOKEN_HERE";
+const GITHUB_REPO = "dailysimile/Daily-Simile";
+const GITHUB_FILE_PATH = "data.json";
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
 
 let blobCache = null; // holds all shared data in memory after the first fetch
+let fileSha = null;   // GitHub needs this to confirm we're updating the latest version
+
+function encodeContent(obj){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function decodeContent(base64){
+  return JSON.parse(decodeURIComponent(escape(atob(base64.replace(/\n/g, "")))));
+}
 
 async function fetchBlob(){
-  const id = await ensureBlob();
-  const res = await fetch(`${BLOB_API}/${id}`, {headers:{"Accept":"application/json"}, cache: "no-store"});
-  if(res.status === 429){
+  const res = await fetch(GITHUB_API, {
+    headers: {
+      "Authorization": `Bearer ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github+json"
+    },
+    cache: "no-store"
+  });
+  if(res.status === 404){
+    // File doesn't exist yet — first run. Nothing saved yet is fine.
+    fileSha = null;
+    return {};
+  }
+  if(res.status === 403){
     throw new Error("RATE_LIMITED");
   }
   if(!res.ok) throw new Error("Shared storage request failed");
-  return await res.json();
+  const data = await res.json();
+  fileSha = data.sha;
+  return decodeContent(data.content);
 }
 
 async function storageGet(key){
@@ -666,23 +664,55 @@ async function storageGet(key){
 
 async function storageSet(key, value){
   if(blobCache === null){
-    // Only fetch first if we don't already have a working copy in memory
     blobCache = await fetchBlob();
   }
-  const id = await ensureBlob();
   blobCache[key] = value;
-  const putRes = await fetch(`${BLOB_API}/${id}`, {
+
+  const body = {
+    message: "Update simile data",
+    content: encodeContent(blobCache)
+  };
+  if(fileSha) body.sha = fileSha;
+
+  const putRes = await fetch(GITHUB_API, {
     method: "PUT",
-    cache: "no-store",
-    headers: {"Content-Type": "application/json", "Accept": "application/json"},
-    body: JSON.stringify(blobCache)
+    headers: {
+      "Authorization": `Bearer ${GITHUB_TOKEN}`,
+      "Accept": "application/vnd.github+json"
+    },
+    body: JSON.stringify(body)
   });
-  if(putRes.status === 429){
+
+  if(putRes.status === 409 || putRes.status === 422){
+    // Someone else saved in between — refetch the latest and try once more
+    blobCache = await fetchBlob();
+    blobCache[key] = value;
+    const retryRes = await fetch(GITHUB_API, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github+json"
+      },
+      body: JSON.stringify({
+        message: "Update simile data",
+        content: encodeContent(blobCache),
+        sha: fileSha
+      })
+    });
+    if(!retryRes.ok) throw new Error("Save request failed");
+    const retryData = await retryRes.json();
+    fileSha = retryData.content.sha;
+    return;
+  }
+
+  if(putRes.status === 403){
     throw new Error("RATE_LIMITED");
   }
   if(!putRes.ok){
     throw new Error("Save request failed");
   }
+  const putData = await putRes.json();
+  fileSha = putData.content.sha;
 }
 
 async function loadData(){
@@ -700,8 +730,8 @@ async function loadData(){
     const saved = await storageGet("simile-entries");
     if(saved !== null && saved !== undefined){
       entries = JSON.parse(saved);
-      entriesLoadedOK = true;
     }
+    entriesLoadedOK = true;
   }catch(e){
     entriesLoadedOK = false;
     if(e.message === "RATE_LIMITED"){
