@@ -656,9 +656,9 @@ async function storageGet(key){
 }
 
 async function storageSet(key, value){
-  if(blobCache === null){
-    blobCache = await fetchBlob();
-  }
+  // Always get the freshest copy right before saving, so an old cached
+  // version can never silently overwrite newer changes made elsewhere.
+  blobCache = await fetchBlob();
   blobCache[key] = value;
 
   const putRes = await fetch(WORKER_API, {
