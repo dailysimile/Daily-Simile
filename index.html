@@ -702,7 +702,8 @@ async function loadData(){
   }
 
   // Safety check: never let a failed or suspicious load wipe out real data.
-  // Only merge in seeds and save back when the load genuinely succeeded.
+  // Only add missing seeds — never overwrite an existing entry, so edits
+  // (like Background notes) are never silently reverted.
   if(entriesLoadedOK){
     let changedSeed = false;
     SEED_ENTRIES.forEach(seed => {
@@ -713,9 +714,6 @@ async function loadData(){
           entries.push(seed);
           changedSeed = true;
         }
-      } else if(JSON.stringify(entries[idx]) !== JSON.stringify(seed)){
-        entries[idx] = seed;
-        changedSeed = true;
       }
     });
     if(changedSeed){
@@ -969,7 +967,6 @@ function normalizeForCompare(str){
 }
 
 function textSimilarity(a, b){
-  // Simple word-overlap similarity, good enough for catching near-duplicate submissions
   const wordsA = new Set(a.split(" ").filter(Boolean));
   const wordsB = new Set(b.split(" ").filter(Boolean));
   if(wordsA.size === 0 || wordsB.size === 0) return 0;
