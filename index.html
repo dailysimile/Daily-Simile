@@ -239,6 +239,15 @@
     color: var(--muted-soft);
     margin: -4px 0 10px;
   }
+  .background-note{
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--muted);
+    margin: -2px 0 12px;
+    padding-left: 10px;
+    border-left: 2px solid var(--panel-line);
+  }
   .entry .meta{
     display:flex;
     justify-content: space-between;
@@ -420,6 +429,11 @@
           <label for="chapterInput">Chapter</label>
           <input id="chapterInput" type="text" placeholder="e.g. Chapter 3">
         </div>
+      </div>
+
+      <div class="field">
+        <label for="backgroundInput">Background (optional)</label>
+        <textarea id="backgroundInput" placeholder="A sentence or two on what's happening in the story, or why the comparison works"></textarea>
       </div>
 
       <div class="field">
@@ -806,6 +820,9 @@ function renderLibrary(){
     const spellingNote = entry.author === "William Shakespeare"
       ? `<p class="spelling-note">Spelling as in the original text</p>`
       : "";
+    const backgroundNote = entry.background
+      ? `<p class="background-note">${escapeHtml(entry.background)}</p>`
+      : "";
 
     div.innerHTML = `
       <div class="entry-actions">
@@ -814,6 +831,7 @@ function renderLibrary(){
       </div>
       <p class="quote">${escapeHtml(entry.text)}</p>
       ${spellingNote}
+      ${backgroundNote}
       <div class="meta">
         <span class="source">${escapeHtml(sourceText)}</span>
         <span class="tag">${escapeHtml(entry.category)}</span>
@@ -836,6 +854,8 @@ function renderEditForm(div, entry){
       <input class="edit-book" value="${escapeHtml(entry.book || "")}">
       <label>Chapter</label>
       <input class="edit-chapter" value="${escapeHtml(entry.chapter || "")}">
+      <label>Background (optional)</label>
+      <textarea class="edit-background" rows="2">${escapeHtml(entry.background || "")}</textarea>
       <label>Category</label>
       <select class="edit-category">
         ${categories.map(c => `<option value="${escapeHtml(c)}" ${c === entry.category ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
@@ -851,12 +871,13 @@ function renderEditForm(div, entry){
     const author = div.querySelector(".edit-author").value.trim();
     const book = div.querySelector(".edit-book").value.trim();
     const chapter = div.querySelector(".edit-chapter").value.trim();
+    const background = div.querySelector(".edit-background").value.trim();
     const category = div.querySelector(".edit-category").value;
     if(!text || !author || !book || !chapter){
       showStatus("All fields except submitter are required");
       return;
     }
-    entries = entries.map(e => e.id === entry.id ? {...e, text, author, book, chapter, category} : e);
+    entries = entries.map(e => e.id === entry.id ? {...e, text, author, book, chapter, background, category} : e);
     await saveEntries();
     renderLibrary();
     showStatus("Simile updated");
@@ -897,9 +918,13 @@ function renderReview(){
     if(entry.chapter) sourceBits.push(entry.chapter);
     const sourceText = sourceBits.length ? sourceBits.join(" · ") : "Unknown source";
     const submittedBy = entry.submitter ? `Submitted by ${entry.submitter}` : "Submitted anonymously";
+    const backgroundNote = entry.background
+      ? `<p class="background-note">${escapeHtml(entry.background)}</p>`
+      : "";
 
     div.innerHTML = `
       <p class="quote">${escapeHtml(entry.text)}</p>
+      ${backgroundNote}
       <div class="meta">
         <span class="source">${escapeHtml(sourceText)}</span>
         <span class="tag">${escapeHtml(entry.category)}</span>
@@ -996,6 +1021,7 @@ $("saveBtn").onclick = async ()=>{
     author,
     book,
     chapter,
+    background: $("backgroundInput").value.trim(),
     submitter: $("submitterInput").value.trim(),
     category: $("categorySelect").value,
     status: "pending"
@@ -1007,6 +1033,7 @@ $("saveBtn").onclick = async ()=>{
   $("authorInput").value = "";
   $("bookInput").value = "";
   $("chapterInput").value = "";
+  $("backgroundInput").value = "";
   $("submitterInput").value = "";
 
   updateBadge();
