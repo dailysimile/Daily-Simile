@@ -597,7 +597,11 @@ const SEED_ENTRIES = [
   {id:"seed-125", text:"Poor Dorothea felt that every word of her uncle's was about as pleasant as a grain of sand in the eye to Mr. Casaubon.", author:"George Eliot", book:"Middlemarch", chapter:"Chapter 37", category:"Emotion", status:"approved"},
   {id:"seed-126", text:"Going up that river was like travelling back to the earliest beginnings of the world, when vegetation rioted on the earth and the big trees were kings.", author:"Joseph Conrad", book:"Heart of Darkness", chapter:"Chapter 2", category:"Nature", status:"approved"},
   {id:"seed-127", text:"...the piston of the steam-engine worked monotonously up and down, like the head of an elephant in a state of melancholy madness.", author:"Charles Dickens", book:"Hard Times", chapter:"Chapter 5", category:"Other", status:"approved"},
-  {id:"seed-128", text:"Her skin was as clear and delicate as a rose-leaf, and her eyes as blue as the deepest sea.", author:"Hans Christian Andersen", book:"The Little Mermaid", chapter:"Opening section", category:"People", status:"approved"}
+  {id:"seed-128", text:"Her skin was as clear and delicate as a rose-leaf, and her eyes as blue as the deepest sea.", author:"Hans Christian Andersen", book:"The Little Mermaid", chapter:"Opening section", category:"People", status:"approved"},
+  {id:"seed-129", text:"He is as solitary as an oyster.", author:"Charles Dickens", book:"A Christmas Carol", chapter:"Stave One", category:"People", status:"approved"},
+  {id:"seed-130", text:"This very night; for love is like a child That longs for everything that he can come by.", author:"William Shakespeare", book:"The Two Gentlemen of Verona", chapter:"Act 3, Scene 1", category:"Emotion", status:"approved"},
+  {id:"seed-131", text:"We are as clouds that veil the midnight moon; How restlessly they speed, and gleam, and quiver.", author:"Percy Bysshe Shelley", book:"Mutability", chapter:"Stanza 1", category:"Nature", status:"approved"},
+  {id:"seed-132", text:"In love, a woman is like a lyre that surrenders its secrets only to the hand that knows how to touch its strings.", author:"Honore de Balzac", book:"The Physiology of Marriage", chapter:"Meditation on love", category:"Emotion", status:"approved"}
 ];
 
 
@@ -614,45 +618,20 @@ function showStatus(msg){
   setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2000);
 }
 
-// Shared storage now lives inside this GitHub repo itself, as a file called
-// data.json. GITHUB_TOKEN is a placeholder — replace the text below with
-// your real token directly in GitHub's file editor before uploading,
-// never here in chat.
-const GITHUB_TOKEN = "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";
-const GITHUB_REPO = "dailysimile/Daily-Simile";
-const GITHUB_FILE_PATH = "data.json";
-const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+// Shared storage now goes through a private Worker, which holds the real
+// GitHub token privately on Cloudflare's side — nothing sensitive lives in
+// this file anymore.
+const WORKER_API = "https://dailysimileappstorage.dailysimile3.workers.dev";
 
 let blobCache = null; // holds all shared data in memory after the first fetch
-let fileSha = null;   // GitHub needs this to confirm we're updating the latest version
-
-function encodeContent(obj){
-  return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
-}
-function decodeContent(base64){
-  return JSON.parse(decodeURIComponent(escape(atob(base64.replace(/\n/g, "")))));
-}
 
 async function fetchBlob(){
-  const res = await fetch(GITHUB_API, {
-    headers: {
-      "Authorization": `Bearer ${GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github+json"
-    },
-    cache: "no-store"
-  });
-  if(res.status === 404){
-    // File doesn't exist yet — first run. Nothing saved yet is fine.
-    fileSha = null;
-    return {};
-  }
+  const res = await fetch(WORKER_API, { cache: "no-store" });
   if(res.status === 403){
     throw new Error("RATE_LIMITED");
   }
   if(!res.ok) throw new Error("Shared storage request failed");
-  const data = await res.json();
-  fileSha = data.sha;
-  return decodeContent(data.content);
+  return await res.json();
 }
 
 async function storageGet(key){
@@ -668,42 +647,11 @@ async function storageSet(key, value){
   }
   blobCache[key] = value;
 
-  const body = {
-    message: "Update simile data",
-    content: encodeContent(blobCache)
-  };
-  if(fileSha) body.sha = fileSha;
-
-  const putRes = await fetch(GITHUB_API, {
+  const putRes = await fetch(WORKER_API, {
     method: "PUT",
-    headers: {
-      "Authorization": `Bearer ${GITHUB_TOKEN}`,
-      "Accept": "application/vnd.github+json"
-    },
-    body: JSON.stringify(body)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: blobCache })
   });
-
-  if(putRes.status === 409 || putRes.status === 422){
-    // Someone else saved in between — refetch the latest and try once more
-    blobCache = await fetchBlob();
-    blobCache[key] = value;
-    const retryRes = await fetch(GITHUB_API, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github+json"
-      },
-      body: JSON.stringify({
-        message: "Update simile data",
-        content: encodeContent(blobCache),
-        sha: fileSha
-      })
-    });
-    if(!retryRes.ok) throw new Error("Save request failed");
-    const retryData = await retryRes.json();
-    fileSha = retryData.content.sha;
-    return;
-  }
 
   if(putRes.status === 403){
     throw new Error("RATE_LIMITED");
@@ -711,8 +659,6 @@ async function storageSet(key, value){
   if(!putRes.ok){
     throw new Error("Save request failed");
   }
-  const putData = await putRes.json();
-  fileSha = putData.content.sha;
 }
 
 async function loadData(){
