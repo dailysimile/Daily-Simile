@@ -398,6 +398,7 @@
     <button class="tab active" data-tab="library">Library</button>
     <button class="tab" data-tab="add">Add a Simile</button>
     <button class="tab" data-tab="review">Review <span class="badge" id="pendingBadge" style="display:none;">0</span></button>
+    <button class="tab" data-tab="daily">Daily Challenge</button>
   </div>
 
   <!-- LIBRARY VIEW -->
@@ -475,6 +476,16 @@
     </div>
     <button class="signout" id="lockAgainBtn" style="display:none;">Lock review screen</button>
   </div>
+
+        <!-- DAILY CHALLENGE VIEW -->
+        <div class="view" id="view-daily">
+                  <div class="card">
+                              <p style="font-family:Helvetica,Arial,sans-serif;font-size:0.75rem;color:#8a8880;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Today's Challenge &mdash; guess the book</p>
+                              <p id="dailyQuoteText" style="font-style:italic;font-size:1.15rem;text-align:center;"></p>
+                              <div id="dailyOptions" style="display:flex;flex-direction:column;gap:10px;margin-top:20px;"></div>
+                              <div id="dailyResult" style="display:none;margin-top:18px;"></div>
+                  </div>
+        </div>
 
 </div>
 
@@ -956,6 +967,64 @@ async function deleteEntry(id){
   renderLibrary();
   showStatus("Deleted");
 }
+
+                           function pickDailySimile(){
+                               const pool = entries.filter(e => !e.status || e.status === "approved");
+                               if(!pool.length) return null;
+                               const day = new Date().toISOString().slice(0,10);
+                               let hash = 0;
+                               for(let i=0;i<day.length;i++){ hash = (hash*31 + day.charCodeAt(i)) >>> 0; }
+                               return pool[hash % pool.length];
+                           }
+
+  function renderDailyChallenge(){
+      const quoteEl = document.getElementById("dailyQuoteText");
+      const optionsEl = document.getElementById("dailyOptions");
+      const resultEl = document.getElementById("dailyResult");
+      const todays = pickDailySimile();
+      if(!todays){
+            quoteEl.textContent = "No similes yet.";
+            optionsEl.innerHTML = "";
+            resultEl.style.display = "none";
+            return;
+      }
+      quoteEl.textContent = todays.text;
+      resultEl.style.display = "none";
+      resultEl.innerHTML = "";
+      const others = entries.filter(e => e.book !== todays.book);
+      const shuffled = others.slice().sort(() => Math.random() - 0.5);
+      const wrongBooks = [];
+      for(const e of shuffled){
+            if(!wrongBooks.includes(e.book)){ wrongBooks.push(e.book); }
+            if(wrongBooks.length >= 3) break;
+      }
+      const choices = wrongBooks.concat([todays.book]).sort(() => Math.random() - 0.5);
+      optionsEl.innerHTML = "";
+      choices.forEach(book => {
+            const btn = document.createElement("button");
+            btn.className = "btn-small";
+            btn.textContent = book;
+            btn.onclick = () => {
+                    const correct = book === todays.book;
+                    resultEl.style.display = "block";
+                    resultEl.innerHTML =
+                              "<p style='font-weight:bold;color:" + (correct ? "#7B98A8" : "#C0392B") + ";text-align:center;'>" +
+                              (correct ? "Correct!" : "Not quite.") + "</p>" +
+                              "<p style='text-align:center;'><strong>" + escapeHtml(todays.author) + " &middot; " + escapeHtml(todays.book) + (todays.chapter ? " &middot; " + escapeHtml(todays.chapter) : "") + "</strong></p>" +
+                              (todays.background ? "<p class='context-note'>" + escapeHtml(todays.background) + "</p>" : "");
+                    optionsEl.querySelectorAll("button").forEach(b => b.disabled = true);
+            };
+            optionsEl.appendChild(btn);
+      });
+  }
+
+  document.querySelector("[data-tab='daily']").addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelector("[data-tab='daily']").classList.add("active");
+      document.getElementById("view-daily").classList.add("active");
+      renderDailyChallenge();
+  });
 
 function normalizeForCompare(str){
   return str
