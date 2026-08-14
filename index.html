@@ -466,7 +466,6 @@
         <input id="pinInput" type="password" placeholder="PIN">
         <button class="btn-small" id="unlockBtn">Unlock</button>
       </div>
-      <p>Only the reviewer needs this. Default PIN is <strong>2468</strong> — tell Claude if you'd like it changed.</p>
     </div>
     <div id="reviewList" style="display:none;"></div>
     <div class="backup-bar" id="backupBar" style="display:none;">
@@ -481,7 +480,7 @@
 
 <script>
 const DEFAULT_CATEGORIES = ["Nature", "Emotion", "People", "Place", "Time", "Other"];
-const REVIEW_PIN = "2468";
+const REVIEW_PIN = "3256";
 
 const SEED_ENTRIES = [
   {id:"seed-001", text:"A hump like a snow-hill", author:"Herman Melville", book:"Moby-Dick", chapter:"Chapter 133", category:"Nature", status:"approved"},
