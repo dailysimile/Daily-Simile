@@ -1123,6 +1123,13 @@ async function deleteEntry(id){
 
                            function pickDailySimile(){
                                const pool = entries.filter(e => !e.status || e.status === "approved");
+                               if(!pool.length) return null;
+                               const day = new Date().toISOString().slice(0,10);
+                               let hash = 0;
+                               for(let i=0;i<day.length;i++){ hash = (hash*31 + day.charCodeAt(i)) >>> 0; }
+                               return pool[hash % pool.length];
+                           }
+  
                                function renderDailyChallenge(){
                                    const quoteEl = document.getElementById("dailyQuoteText");
                                    const optionsEl = document.getElementById("dailyOptions");
