@@ -1170,13 +1170,6 @@ async function deleteEntry(id){
                                          optionsEl.appendChild(btn);
                                    });
                                }
-                              "<p style='text-align:center;'><strong>" + escapeHtml(todays.author) + " &middot; " + escapeHtml(todays.book) + (todays.chapter ? " &middot; " + escapeHtml(todays.chapter) : "") + "</strong></p>" +
-                              (todays.background ? "<p class='context-note'>" + escapeHtml(todays.background) + "</p>" : "");
-                    optionsEl.querySelectorAll("button").forEach(b => b.disabled = true);
-            };
-            optionsEl.appendChild(btn);
-      });
-  }
 
   document.querySelector("[data-tab='daily']").addEventListener("click", () => {
       document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
