@@ -529,35 +529,13 @@ function colourFor(cat){ return CATEGORY_COLOURS[cat] || FALLBACK_COLOUR; }
    show a tinted initial instead, or a picture a submitter supplies. */
 const P = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 const BOOK_ART = {
-  "A Christmas Carol": { url: P + "Marley%27s%20Ghost-John%20Leech%2C%201843.jpg?width=700", credit: "John Leech, 1843 — public domain" },
   "Alice's Adventures in Wonderland": { url: P + "Alice%20in%20Wonderland%20by%20Arthur%20Rackham%20-%2008%20-%20A%20Mad%20Tea-Party.jpg?width=700", credit: "Arthur Rackham, 1907 — public domain" },
   "I Wandered Lonely as a Cloud": { url: P + "J%20M%20W%20Turner%20-%20Ullswater%20from%20Gobarrow%20Park.jpg?width=700", credit: "J. M. W. Turner — public domain" },
   "Moby-Dick": { url: P + "Moby%20Dick%20p510%20illustration.jpg?width=700", credit: "1892 edition — public domain" },
   "Frankenstein": { url: P + "Frontispiece%20to%20Frankenstein%201831.jpg?width=700", credit: "Theodor von Holst, 1831 — public domain" },
   "Treasure Island": { url: P + "Treasure%20Island-Scribner%27s-1911.jpg?width=700", credit: "N. C. Wyeth, 1911 — public domain" },
-  "Dracula": { url: P + "Dracula1st.jpeg?width=700", credit: "1897 first edition — public domain" },
   "Adventures of Huckleberry Finn": { url: P + "Huckleberry%20Finn%20book.JPG?width=700", credit: "E. W. Kemble, 1884 — public domain" },
-  "The Great Gatsby": { url: P + "The%20Great%20Gatsby%20Cover%201925%20Retouched.jpg?width=700", credit: "Francis Cugat, 1925 — public domain" },
-  "Paradise Lost": { url: P + "Paradise%20Lost%2012.jpg?width=700", credit: "Gustave Doré — public domain" },
-  "Jane Eyre": { url: P + "P422b.jpg?width=700", credit: "F. H. Townsend, 1897 — public domain" },
-  "Great Expectations": { url: P + "%22It's%20a%20great%20cake.%20A%20bride-cake.%20Mine!%22.jpeg?width=700", credit: "John McLenan — public domain" },
-  "Little Women": { url: P + "Louisa%20May%20Alcott%20Little%20Women%201880%20Frank%20T%20Merrill%20illustrator%20He%20waved%20his%20hand%20p409.jpg?width=700", credit: "Frank T. Merrill, 1880 — public domain" },
-  "Romeo and Juliet": { url: P + "Frank%20Bernard%20Dicksee%20-%20Romeo%20and%20Juliet%2C%201884.jpg?width=700", credit: "Frank Dicksee, 1884 — public domain" },
-  "Pride and Prejudice": { url: P + "Thomson-PP06.jpg?width=700", credit: "Hugh Thomson, 1894 — public domain" },
-  "Peter and Wendy": { url: P + "Peter%20pan%201911%20pipes.jpg?width=700", credit: "F. D. Bedford, 1911 — public domain" },
-  "The Wonderful Wizard of Oz": { url: P + "The%20Wonderful%20Wizard%20of%20Oz%20-%20W.W.%20Denslow%20cover.jpg?width=700", credit: "W. W. Denslow, 1900 — public domain" },
-  "Robinson Crusoe": { url: P + "Robinson%20Crusoe%20Walter%20Paget%201896%20060.jpg?width=700", credit: "Walter Paget, 1896 — public domain" },
-  "Oliver Twist": { url: P + "Cruikshank%20-%20The%20Last%20Chance%20(Oliver%20Twist).png?width=700", credit: "George Cruikshank — public domain" },
-  "Anne of Green Gables": { url: P + "Anne%20of%20Green%20Gables%20-%20frontispiece.jpg?width=700", credit: "M. A. and W. A. J. Claus, 1908 — public domain" },
-  "A Study in Scarlet": { url: P + "Portrait%20of%20Sherlock%20Holmes%20by%20Sidney%20Paget.jpg?width=700", credit: "Sidney Paget — public domain" },
-  "The Jungle Book": { url: P + "Mowgli-1895-illustration.png?width=700", credit: "1895 edition — public domain" },
-  "Gulliver's Travels": { url: P + "Willmann%2C%20Colin%2C%20%26%20Outhwaite%2C%20Gulliver%20and%20the%20Emperor%20of%20Lilliput%2C%20cph.3b18907.jpg?width=700", credit: "Engraving, 1850 — public domain" },
-  "David Copperfield": { url: P + "David%20Copperfield%20and%20his%20aunt.jpeg?width=700", credit: "Hablot Knight Browne — public domain" },
-  "Vanity Fair": { url: P + "Vanity%20Fair%20D467.png?width=700", credit: "W. M. Thackeray, 1848 — public domain" },
-  "Macbeth": { url: P + "Battle%20of%20Dunsinane%20-%20John%20Martin.jpg?width=700", credit: "John Martin, 1820 — public domain" },
-  "Hamlet": { url: P + "John%20Everett%20Millais%20-%20Ophelia%20-%20Google%20Art%20Project.jpg?width=700", credit: "John Everett Millais, 1851 — public domain" },
-  "Uncle Tom's Cabin": { url: P + "Uncle%20Tom's%20Cabin%20-%20Eliza%2C%20Harry%2C%20Chloe%2C%20Tom%20and%20Old%20Bruno.jpg?width=700", credit: "1852 edition — public domain" },
-  "The Hound of the Baskervilles": { url: P + "Houn-42%20-%20Frontispiece%20(Hound%20of%20Baskervilles).jpg?width=700", credit: "Sidney Paget, 1902 — public domain" }
+  "Paradise Lost": { url: P + "Paradise%20Lost%2012.jpg?width=700", credit: "Gustave Doré — public domain" }
 };
 
 let categories = [...DEFAULT_CATEGORIES];
