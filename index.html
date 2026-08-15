@@ -141,6 +141,120 @@
               transform: translateY(-2px);
               box-shadow: 0 10px 24px rgba(58,42,28,0.13), 0 1px 3px rgba(58,42,28,0.08);
       }
+      .daily-card{
+              max-width: 640px;
+              margin: 0 auto;
+              padding: 44px 40px;
+              text-align: center;
+      }
+      .daily-eyebrow{
+              font-family: Helvetica, Arial, sans-serif;
+              font-size: 0.85rem;
+              letter-spacing: 2px;
+              text-transform: uppercase;
+              color: var(--gold);
+              font-weight: 700;
+              margin: 0 0 18px;
+      }
+      .daily-quote{
+              font-style: italic;
+              font-size: 1.65rem;
+              line-height: 1.45;
+              margin: 0 0 10px;
+              color: var(--ink);
+      }
+      .daily-instruction{
+              font-family: Helvetica, Arial, sans-serif;
+              font-size: 0.85rem;
+              color: var(--muted);
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin: 0 0 26px;
+      }
+      .daily-options{
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+      }
+      .daily-option{
+              display: flex;
+              align-items: center;
+              gap: 14px;
+              width: 100%;
+              text-align: left;
+              padding: 18px 22px;
+              font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
+              font-size: 1.15rem;
+              color: var(--ink);
+              background: var(--panel);
+              border: 2px solid var(--panel-line);
+              border-radius: 14px;
+              cursor: pointer;
+              transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+              box-shadow: 0 2px 6px rgba(58,42,28,0.06);
+      }
+      .daily-option:hover:not(:disabled){
+              border-color: var(--gold);
+              transform: translateY(-2px) scale(1.01);
+              box-shadow: 0 8px 18px rgba(58,42,28,0.12);
+              background: var(--gold-soft);
+      }
+      .daily-option:active:not(:disabled){
+              transform: translateY(0) scale(0.99);
+      }
+      .daily-option-letter{
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 36px;
+              height: 36px;
+              min-width: 36px;
+              border-radius: 50%;
+              background: var(--gold-soft);
+              color: var(--gold);
+              font-family: Helvetica, Arial, sans-serif;
+              font-weight: 700;
+              font-size: 0.95rem;
+      }
+      .daily-option.is-correct{
+              background: var(--gold-soft);
+              border-color: var(--gold);
+      }
+      .daily-option.is-correct .daily-option-letter{
+              background: var(--gold);
+              color: #FFFCF6;
+      }
+      .daily-option.is-wrong{
+              background: var(--rust-soft);
+              border-color: var(--rust);
+      }
+      .daily-option.is-wrong .daily-option-letter{
+              background: var(--rust);
+              color: #FFFCF6;
+      }
+      .daily-result{
+              animation: dailyPop 0.35s ease;
+      }
+      @keyframes dailyPop{
+              from{ opacity: 0; transform: translateY(8px) scale(0.97); }
+              to{ opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .daily-result-headline{
+              font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
+              font-style: italic;
+              font-size: 1.8rem;
+              margin: 22px 0 10px;
+      }
+      .daily-result-headline.is-correct{ color: var(--gold); }
+      .daily-result-headline.is-wrong{ color: var(--rust); }
+      .daily-result-citation{
+              font-weight: 700;
+              margin-bottom: 14px;
+              font-size: 1.05rem;
+      }
+      .daily-result-note{
+              text-align: left;
+      }
   label{
     display:block;
     font-family: Helvetica, Arial, sans-serif;
@@ -515,14 +629,16 @@
   </div>
 
         <!-- DAILY CHALLENGE VIEW -->
-        <div class="view" id="view-daily">
-                  <div class="card">
-                              <p style="font-family:Helvetica,Arial,sans-serif;font-size:0.75rem;color:#8a8880;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Today's Challenge &mdash; guess the book</p>
-                              <p id="dailyQuoteText" style="font-style:italic;font-size:1.15rem;text-align:center;"></p>
-                              <div id="dailyOptions" style="display:flex;flex-direction:column;gap:10px;margin-top:20px;"></div>
-                              <div id="dailyResult" style="display:none;margin-top:18px;"></div>
-                  </div>
-        </div>
+      <div class="view" id="view-daily">
+              <div class="card daily-card">
+                          <p class="daily-eyebrow">&#9733; Today's Challenge &#9733;</p>
+                          <p id="dailyQuoteText" class="daily-quote"></p>
+                          <p class="daily-instruction">Which book is this from?</p>
+                          <div id="dailyOptions" class="daily-options"></div>
+                          <div id="dailyResult" class="daily-result" style="display:none;"></div>
+              </div>
+      </div>
+              </div>
 
 </div>
 
@@ -1007,46 +1123,53 @@ async function deleteEntry(id){
 
                            function pickDailySimile(){
                                const pool = entries.filter(e => !e.status || e.status === "approved");
-                               if(!pool.length) return null;
-                               const day = new Date().toISOString().slice(0,10);
-                               let hash = 0;
-                               for(let i=0;i<day.length;i++){ hash = (hash*31 + day.charCodeAt(i)) >>> 0; }
-                               return pool[hash % pool.length];
-                           }
-
-  function renderDailyChallenge(){
-      const quoteEl = document.getElementById("dailyQuoteText");
-      const optionsEl = document.getElementById("dailyOptions");
-      const resultEl = document.getElementById("dailyResult");
-      const todays = pickDailySimile();
-      if(!todays){
-            quoteEl.textContent = "No similes yet.";
-            optionsEl.innerHTML = "";
-            resultEl.style.display = "none";
-            return;
-      }
-      quoteEl.textContent = todays.text;
-      resultEl.style.display = "none";
-      resultEl.innerHTML = "";
-      const others = entries.filter(e => e.book !== todays.book);
-      const shuffled = others.slice().sort(() => Math.random() - 0.5);
-      const wrongBooks = [];
-      for(const e of shuffled){
-            if(!wrongBooks.includes(e.book)){ wrongBooks.push(e.book); }
-            if(wrongBooks.length >= 3) break;
-      }
-      const choices = wrongBooks.concat([todays.book]).sort(() => Math.random() - 0.5);
-      optionsEl.innerHTML = "";
-      choices.forEach(book => {
-            const btn = document.createElement("button");
-            btn.className = "btn-small";
-            btn.textContent = book;
-            btn.onclick = () => {
-                    const correct = book === todays.book;
-                    resultEl.style.display = "block";
-                    resultEl.innerHTML =
-                              "<p style='font-weight:bold;color:" + (correct ? "#7B98A8" : "#C0392B") + ";text-align:center;'>" +
-                              (correct ? "Correct!" : "Not quite.") + "</p>" +
+                               function renderDailyChallenge(){
+                                   const quoteEl = document.getElementById("dailyQuoteText");
+                                   const optionsEl = document.getElementById("dailyOptions");
+                                   const resultEl = document.getElementById("dailyResult");
+                                   const todays = pickDailySimile();
+                                   if(!todays){
+                                         quoteEl.textContent = "No similes yet.";
+                                         optionsEl.innerHTML = "";
+                                         resultEl.style.display = "none";
+                                         return;
+                                   }
+                                   quoteEl.textContent = todays.text;
+                                   resultEl.style.display = "none";
+                                   resultEl.innerHTML = "";
+                                   const others = entries.filter(e => e.book !== todays.book);
+                                   const shuffled = others.slice().sort(() => Math.random() - 0.5);
+                                   const wrongBooks = [];
+                                   for(const e of shuffled){
+                                         if(!wrongBooks.includes(e.book)){ wrongBooks.push(e.book); }
+                                         if(wrongBooks.length >= 3) break;
+                                   }
+                                   const choices = wrongBooks.concat([todays.book]).sort(() => Math.random() - 0.5);
+                                   const letters = ["A","B","C","D"];
+                                   optionsEl.innerHTML = "";
+                                   const buttons = [];
+                                   choices.forEach((book, i) => {
+                                         const btn = document.createElement("button");
+                                         btn.className = "daily-option";
+                                         btn.innerHTML = '<span class="daily-option-letter">' + letters[i] + '</span><span>' + escapeHtml(book) + '</span>';
+                                         btn.onclick = () => {
+                                                 const correct = book === todays.book;
+                                                 buttons.forEach(b => {
+                                                           b.btn.disabled = true;
+                                                           if(b.book === todays.book){ b.btn.classList.add("is-correct"); }
+                                                           else if(b.btn === btn){ b.btn.classList.add("is-wrong"); }
+                                                 });
+                                                 resultEl.style.display = "block";
+                                                 resultEl.innerHTML =
+                                                           '<p class="daily-result-headline ' + (correct ? "is-correct" : "is-wrong") + '">' +
+                                                           (correct ? "Correct! \u2728" : "Not quite!") + "</p>" +
+                                                           '<p class="daily-result-citation">' + escapeHtml(todays.author) + " &middot; " + escapeHtml(todays.book) + (todays.chapter ? " &middot; " + escapeHtml(todays.chapter) : "") + "</p>" +
+                                                           (todays.background ? '<p class="daily-result-note context-note">' + escapeHtml(todays.background) + "</p>" : "");
+                                         };
+                                         buttons.push({btn: btn, book: book});
+                                         optionsEl.appendChild(btn);
+                                   });
+                               }
                               "<p style='text-align:center;'><strong>" + escapeHtml(todays.author) + " &middot; " + escapeHtml(todays.book) + (todays.chapter ? " &middot; " + escapeHtml(todays.chapter) : "") + "</strong></p>" +
                               (todays.background ? "<p class='context-note'>" + escapeHtml(todays.background) + "</p>" : "");
                     optionsEl.querySelectorAll("button").forEach(b => b.disabled = true);
