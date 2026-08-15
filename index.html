@@ -2,650 +2,1455 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simile Collector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-      --bg: #F5F0E4;
-          --panel: #FFFCF6;
-          --ink: #2E2B26;
-          --muted: #8B8578;
-          --muted-soft: #DAD3C2;
-          --gold: #6F8F72;
-          --gold-soft: #E3E8DC;
-          --panel-line: #E3DCC9;
-          --danger: #C0392B;
-          --ok: #7B98A8;
-          --rust: #A6472F;
-          --rust-soft: #F1E1DA;
+    --bg: #f8f6f2;
+    --panel: #fffefb;
+    --panel-2: #f3efe8;
+    --ink: #201e1d;
+    --muted: #6f6a63;
+    --line: #e4ded5;
+    --line-strong: #cac2b6;
+    --accent: #b2622d;
+    --accent-soft: #f3d8c4;
+    --accent-deep: #7a3f14;
+    --indigo: #3f4470;
+    --danger: #a8402e;
+    --ok: #5b7360;
+    --serif: 'Literata', Georgia, serif;
+    --sans: 'Figtree', system-ui, Helvetica, Arial, sans-serif;
+    --radius: 18px;
+    --shadow-sm: 0 1px 3px rgba(58,42,28,0.07);
+    --shadow-md: 0 6px 18px rgba(58,42,28,0.09), 0 1px 3px rgba(58,42,28,0.06);
+    --shadow-lg: 0 14px 34px rgba(58,42,28,0.13), 0 2px 6px rgba(58,42,28,0.06);
   }
-  *{box-sizing:border-box;}
+  *{ box-sizing: border-box; }
+  html{ background: var(--bg); }
   body{
     margin:0;
-        background-color: var(--bg);
-        background-image: radial-gradient(circle at 1px 1px, rgba(46,43,38,0.05) 1px, transparent 0);
-        background-size: 22px 22px;
-    color: var(--ink);
-    font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
-    min-height:100vh;
-  }
-  html{
     background: var(--bg);
-  }
-  .wrap{
-      max-width: 980px;
-          margin: 0 auto;
-          padding: 32px 32px 80px;
-          background: transparent;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
     min-height: 100vh;
+    overflow-x: hidden;
   }
-  header{
-    text-align:center;
-    margin-bottom: 22px;
-  }
-  header h1{
-    font-size: 2rem;
-    letter-spacing: 0.5px;
-    margin: 0 0 6px;
-    font-style: italic;
-    font-weight: 600;
-    color: var(--ink);
-  }
-  header p{
-    margin:0;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-      header::after{
-              content: "\2766";
-              display: block;
-              margin: 16px auto 0;
-              width: 160px;
-              text-align: center;
-              color: var(--gold);
-              font-size: 1rem;
-              line-height: 1;
-              position: relative;
-      }
-      header::before{
-              content: "";
-              display: block;
-              width: 64px;
-              height: 1px;
-              margin: 0 auto 14px;
-              background: var(--panel-line);
-      }
+  a{ color: var(--accent-deep); }
+  a:hover{ color: var(--accent); }
+  button{ font-family: var(--sans); }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+  ::selection{ background: var(--accent-soft); }
 
-  .tabs{
-    display:flex;
-    gap: 8px;
-    margin-bottom: 22px;
-    justify-content:center;
+  .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px 28px 110px; }
+
+  /* ── header ───────────────────────────── */
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 24px; flex-wrap: wrap; padding: 6px 0 26px;
+    position: relative; z-index: 3;
   }
+  .brand{
+    font-family: var(--serif); font-weight: 600; font-size: 1.32rem;
+    letter-spacing: -0.01em; cursor: pointer; background:none; border:none;
+    padding: 0; color: var(--ink);
+  }
+  .brand span{ display:block; font-family: var(--sans); font-size: 0.7rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .tabs{ display:flex; gap: 6px; flex-wrap: wrap; }
   .tab{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    padding: 9px 18px;
-    border-radius: 20px;
-    border: 1px solid var(--panel-line);
-    background: var(--panel);
-    color: var(--ink);
-    cursor:pointer;
-          transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-    box-shadow: 0 1px 2px rgba(58,42,28,0.08);
+    font-size: 0.87rem; font-weight: 600; padding: 9px 17px;
+    border-radius: 999px; border: 1.5px solid transparent;
+    background: transparent; color: var(--ink); cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
   }
-      .tab:hover{
-              border-color: var(--gold);
-              transform: translateY(-1px);
-      }
-      .tab.active:hover{
-              transform: none;
-      }
-  .tab.active{
-    border-color: var(--gold);
-    color: #FFFAF3;
-    background: var(--gold);
-  }
+  .tab:hover{ background: var(--panel); border-color: var(--line); }
+  .tab.active{ background: var(--accent); border-color: var(--accent); color: #fffdf8; }
   .badge{
-    display:inline-block;
-    background: var(--ink);
-    color: #FFF8EC;
-    font-size: 0.7rem;
-    font-weight:700;
-    border-radius: 10px;
-    padding: 1px 7px;
-    margin-left: 6px;
+    display:inline-block; background: var(--accent-deep); color:#fffdf8;
+    font-size: 0.7rem; font-weight: 700; border-radius: 999px;
+    padding: 1px 7px; margin-left: 6px;
   }
-  .tab.active .badge{
-    background: #FFFAF3;
-    color: var(--gold);
-  }
+  .tab.active .badge{ background: #fffdf8; color: var(--accent-deep); }
 
   .view{ display:none; }
   .view.active{ display:block; }
 
-.card{
-        background: var(--panel);
-        border: 1px solid var(--panel-line);
-        border-left: 4px solid var(--gold);
-        border-radius: 8px;
-        padding: 22px 22px 22px 26px;
-        margin-bottom: 24px;
-        box-shadow: 0 6px 18px rgba(58,42,28,0.10), 0 1px 3px rgba(58,42,28,0.08);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-      .card:hover{
-              transform: translateY(-2px);
-              box-shadow: 0 10px 24px rgba(58,42,28,0.13), 0 1px 3px rgba(58,42,28,0.08);
-      }
-      .daily-card{
-              max-width: 640px;
-              margin: 0 auto;
-              padding: 44px 40px;
-              text-align: center;
-      }
-      .daily-eyebrow{
-              font-family: Helvetica, Arial, sans-serif;
-              font-size: 0.85rem;
-              letter-spacing: 2px;
-              text-transform: uppercase;
-              color: var(--gold);
-              font-weight: 700;
-              margin: 0 0 18px;
-      }
-      .daily-quote{
-              font-style: italic;
-              font-size: 1.65rem;
-              line-height: 1.45;
-              margin: 0 0 10px;
-              color: var(--ink);
-      }
-      .daily-instruction{
-              font-family: Helvetica, Arial, sans-serif;
-              font-size: 0.85rem;
-              color: var(--muted);
-              text-transform: uppercase;
-              letter-spacing: 1px;
-              margin: 0 0 26px;
-      }
-      .daily-options{
-              display: flex;
-              flex-direction: column;
-              gap: 14px;
-      }
-      .daily-option{
-              display: flex;
-              align-items: center;
-              gap: 14px;
-              width: 100%;
-              text-align: left;
-              padding: 18px 22px;
-              font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
-              font-size: 1.15rem;
-              color: var(--ink);
-              background: var(--panel);
-              border: 2px solid var(--panel-line);
-              border-radius: 14px;
-              cursor: pointer;
-              transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-              box-shadow: 0 2px 6px rgba(58,42,28,0.06);
-      }
-      .daily-option:hover:not(:disabled){
-              border-color: var(--gold);
-              transform: translateY(-2px) scale(1.01);
-              box-shadow: 0 8px 18px rgba(58,42,28,0.12);
-              background: var(--gold-soft);
-      }
-      .daily-option:active:not(:disabled){
-              transform: translateY(0) scale(0.99);
-      }
-      .daily-option-letter{
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 36px;
-              height: 36px;
-              min-width: 36px;
-              border-radius: 50%;
-              background: var(--gold-soft);
-              color: var(--gold);
-              font-family: Helvetica, Arial, sans-serif;
-              font-weight: 700;
-              font-size: 0.95rem;
-      }
-      .daily-option.is-correct{
-              background: var(--gold-soft);
-              border-color: var(--gold);
-      }
-      .daily-option.is-correct .daily-option-letter{
-              background: var(--gold);
-              color: #FFFCF6;
-      }
-      .daily-option.is-wrong{
-              background: var(--rust-soft);
-              border-color: var(--rust);
-      }
-      .daily-option.is-wrong .daily-option-letter{
-              background: var(--rust);
-              color: #FFFCF6;
-      }
-      .daily-result{
-              animation: dailyPop 0.35s ease;
-      }
-      @keyframes dailyPop{
-              from{ opacity: 0; transform: translateY(8px) scale(0.97); }
-              to{ opacity: 1; transform: translateY(0) scale(1); }
-      }
-      .daily-result-headline{
-              font-family: 'Iowan Old Style','Palatino Linotype',Georgia,serif;
-              font-style: italic;
-              font-size: 1.8rem;
-              margin: 22px 0 10px;
-      }
-      .daily-result-headline.is-correct{ color: var(--gold); }
-      .daily-result-headline.is-wrong{ color: var(--rust); }
-      .daily-result-citation{
-              font-weight: 700;
-              margin-bottom: 14px;
-              font-size: 1.05rem;
-      }
-      .daily-result-note{
-              text-align: left;
-      }
-  label{
-    display:block;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin-bottom: 6px;
+  h2{ font-family: var(--serif); font-weight: 600; font-size: 1.7rem; letter-spacing: -0.015em; margin: 0 0 6px; }
+  h3{ font-family: var(--serif); font-weight: 600; font-size: 1.35rem; margin: 0; }
+  .eyebrow{
+    font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin: 0 0 16px;
   }
-  .field{ margin-bottom: 16px; }
-  textarea, input, select{
-    width:100%;
-    background: #F5F3EF;
-    border: 1px solid var(--panel-line);
-    color: var(--ink);
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 1rem;
-  }
-  textarea:focus, input:focus, select:focus{
-    outline: none;
-    border-color: var(--gold);
-  }
-  textarea{ resize: vertical; min-height: 64px; font-style: italic; }
+  .sub{ color: var(--muted); font-size: 0.95rem; margin: 0 0 22px; max-width: 620px; }
+  .section{ margin-bottom: 64px; }
 
-  .row2{
-    display:flex;
-    gap: 12px;
+  /* ── hero ─────────────────────────────── */
+  .hero-holder{ position: relative; }
+  .hero-blob{
+    position:absolute; z-index:0; top: 30px; right: -10px;
+    width: 330px; height: 330px; border-radius: 999px;
+    background: #f6e3d4; pointer-events:none;
   }
-  .row2 > div{ flex:1; }
+  .hero{
+    position: relative; z-index: 1;
+    background: var(--panel); border: 1.5px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-md);
+    padding: 40px 44px; display: flex; gap: 38px; align-items: flex-start;
+  }
+  .hero-body{ display:flex; flex-direction:column; gap: 16px; max-width: 660px; }
+  .hero-quote{
+    font-family: var(--serif); font-weight: 600; font-size: 2.5rem;
+    line-height: 1.1; letter-spacing: -0.02em; margin: 0; text-wrap: pretty;
+    animation: rise 520ms ease both;
+  }
+  @keyframes rise{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform:none; } }
+  .cite{ margin: 0; font-size: 0.95rem; font-weight: 600; }
+  .cite em{ font-weight: 400; font-style: normal; color: var(--muted); }
+  .rule{ width: 54px; height: 4px; border-radius: 999px; background: var(--accent-soft); }
+  .note{ margin: 0; color: var(--muted); font-size: 1rem; }
+  .tiny{ margin: 0; color: var(--muted); font-size: 0.75rem; }
 
-  .cat-add{
-    display:flex;
-    gap:8px;
-    margin-top: 6px;
+  /* ── circular art ─────────────────────── */
+  .art{
+    flex: none; border-radius: 999px; overflow: hidden;
+    background: var(--panel-2); display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 600; color: var(--muted);
   }
-  .cat-add input{ flex:1; }
-  .btn-small{
-    background: var(--gold-soft);
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    border-radius: 6px;
-    padding: 0 14px;
-    cursor:pointer;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-  .btn-small:hover{ background: var(--gold); color: #FFF8EC; }
+  .art img{ width:100%; height:100%; object-fit: cover; display:block;
+    filter: saturate(0.82) contrast(0.94); }
+  .art-xl{ width: 186px; height: 186px; font-size: 3rem; }
+  .art-lg{ width: 140px; height: 140px; font-size: 2.4rem; }
+  .art-sm{ width: 74px; height: 74px; font-size: 1.5rem; }
 
-  .btn-main{
-    width:100%;
-    background: var(--gold);
-    color: #FFF8EC;
-    border:none;
-    padding: 12px;
-    border-radius: 8px;
-    font-family: Helvetica, Arial, sans-serif;
-    font-weight:700;
-    letter-spacing: 0.5px;
-    cursor:pointer;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 5px rgba(189,94,46,0.3);
-  }
-  .btn-main:hover{ opacity: 0.9; }
-  .btn-main:disabled{ opacity:0.4; cursor:not-allowed; }
-
-  .backup-bar{
-    display:flex;
-    gap: 8px;
-    justify-content:flex-end;
-    margin-bottom: 12px;
-  }
-  .search-box{
-    display:block;
-    width:100%;
-    font-family: inherit;
-    font-size: 0.95rem;
-    padding: 10px 14px;
-    margin-bottom: 12px;
-    border: 1px solid var(--panel-line);
-    border-radius: 8px;
-    background: var(--panel);
-    color: var(--ink);
-  }
-  .filters{
-    display:flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-  .chip{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.8rem;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--panel-line);
-    color: var(--ink);
-    cursor:pointer;
-    background: var(--panel);
-    box-shadow: 0 1px 2px rgba(58,42,28,0.06);
-  }
-  .chip.active{
-    border-color: var(--gold);
-    color: #FFFAF3;
-    background: var(--gold);
-  }
-
+  /* ── cards / grid ─────────────────────── */
+  .grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 24px; }
   .entry{
-    background: var(--panel);
-    border: 1px solid var(--panel-line);
-    border-left: 3px solid var(--gold);
-    border-radius: 8px;
-    padding: 18px 20px;
-    margin-bottom: 14px;
-    position: relative;
-    box-shadow: 0 1px 3px rgba(58,42,28,0.08);
+    background: var(--panel); border: 1.5px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-md);
+    padding: 26px 28px 28px; display:flex; flex-direction:column; gap: 14px;
+    position: relative; transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
   }
-  .entry.pending{ border-left-color: var(--muted-soft); }
+  .entry:hover{ box-shadow: var(--shadow-lg); border-color: var(--accent-soft); transform: translateY(-2px); }
+  .entry.wide{ grid-column: span 2; }
   .entry .quote{
-    font-style: italic;
-    font-size: 1.15rem;
-    line-height: 1.5;
-    margin: 0 0 10px;
-    padding-right: 26px;
-    color: var(--ink);
+    font-family: var(--serif); font-weight: 600; font-size: 1.42rem;
+    line-height: 1.2; margin: 0; text-wrap: pretty; cursor: pointer;
   }
-  .spelling-note{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.72rem;
-    font-style: italic;
-    color: var(--muted-soft);
-    margin: -4px 0 10px;
+  .entry.wide .quote{ font-size: 1.3rem; }
+  .entry .quote:hover{ color: var(--accent-deep); }
+  .meta{ margin: 0; font-size: 0.82rem; color: var(--muted); }
+  .meta .book-link{
+    background:none; border:none; padding:0; font: inherit; color: var(--accent-deep);
+    cursor:pointer; text-decoration: underline; text-decoration-color: var(--line-strong);
   }
-  .background-note{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    line-height: 1.4;
-    color: var(--muted);
-    margin: -2px 0 12px;
-    padding-left: 10px;
-    border-left: 2px solid var(--panel-line);
-  }
-  .entry .meta{
-    display:flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.78rem;
-    color: var(--muted);
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .entry .meta .tag{
-    color: var(--ok);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-  }
-  .entry-actions{
-    position:absolute;
-    top: 10px;
-    right: 12px;
-    display:flex;
-    align-items:center;
-    gap: 10px;
-  }
-  .entry-actions .edit{
-    background:none;
-    border:none;
-    color: var(--muted-soft);
-    cursor:pointer;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.75rem;
-    font-weight:700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .entry-actions .edit:hover{ color: var(--gold); }
-  .entry-actions .delete{
-    background:none;
-    border:none;
-    color: var(--danger);
-    opacity: 0.55;
-    cursor:pointer;
-    font-size: 1.1rem;
-    line-height:1;
-  }
-  .entry-actions .delete:hover{ color: var(--danger); opacity: 1; }
+  .meta .book-link:hover{ text-decoration-color: var(--accent); }
+  .teaser{ margin:0; font-size: 0.86rem; color: var(--muted); font-style: italic; }
+  .row{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
+  .spacer{ flex: 1; }
 
-  .edit-form{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
-  .edit-form label{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.72rem;
-    font-weight:700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    margin-top: 6px;
-  }
-  .edit-form textarea,
-  .edit-form input,
-  .edit-form select{
-    font-family: inherit;
-    font-size: 0.95rem;
-    padding: 8px 10px;
-    border: 1px solid var(--panel-line);
-    border-radius: 6px;
-    background: var(--panel);
-    color: var(--ink);
-  }
-  .edit-form-actions{
-    display:flex;
-    gap: 8px;
-    margin-top: 12px;
+  .tag{
+    display:inline-block; font-size: 0.74rem; font-weight: 700;
+    letter-spacing: 0.04em; padding: 5px 13px; border-radius: 999px;
+    align-self: flex-start;
   }
 
-  .review-actions{
-    display:flex;
-    gap: 8px;
-    margin-top: 12px;
+  /* ── buttons ──────────────────────────── */
+  .btn{
+    font-size: 0.87rem; font-weight: 600; border-radius: 999px;
+    padding: 9px 19px; cursor: pointer; border: 1.5px solid var(--line-strong);
+    background: transparent; color: var(--ink);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
   }
-  .btn-approve, .btn-reject{
-    flex:1;
-    border:none;
-    border-radius: 6px;
-    padding: 8px;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    font-weight:700;
-    cursor:pointer;
-  }
-  .btn-approve{ background: var(--ok); color: #F5FAF6; }
-  .btn-reject{ background: #FBE4DC; border: 1px solid var(--danger); color: var(--danger); }
+  .btn:hover{ border-color: var(--accent); }
+  .btn-primary{ background: var(--accent); border-color: var(--accent); color: #fffdf8; }
+  .btn-primary:hover{ background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn-sage{ background: var(--ok); border-color: var(--ok); color: #fffdf8; }
+  .btn-sage:hover{ filter: brightness(0.92); }
+  .btn-sm{ font-size: 0.78rem; padding: 6px 14px; }
+  .btn-save{ color: var(--accent-deep); border-color: var(--accent-soft); }
+  .btn-save.on{ background: var(--accent); border-color: var(--accent); color: #fffdf8; }
+  .btn-quiet{ background:none; border:none; color: var(--muted); font-size: 0.78rem;
+    font-weight: 600; cursor:pointer; padding: 4px 2px; }
+  .btn-quiet:hover{ color: var(--accent); }
+  .btn-danger{ color: var(--danger); border-color: #e8cfc9; }
+  .btn-danger:hover{ border-color: var(--danger); }
+  .btn-block{ width: 100%; }
 
+  /* ── filters ──────────────────────────── */
+  .filters{ display:flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .chip{
+    display:inline-flex; align-items:center; gap: 9px;
+    font-size: 0.85rem; font-weight: 600; border-radius: 999px;
+    padding: 8px 18px 8px 13px; cursor: pointer;
+    border: 1.5px solid var(--line); background: var(--panel); color: var(--ink);
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  .chip:hover{ transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .chip .dot{ width: 9px; height: 9px; border-radius: 999px; }
+  .search{
+    display:block; width:100%; font-family: var(--sans); font-size: 0.95rem;
+    padding: 12px 18px; margin-bottom: 14px; border-radius: 999px;
+    border: 1.5px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  .search:focus{ outline:none; border-color: var(--accent); }
+
+  /* ── strip ────────────────────────────── */
+  .strip{ display:flex; gap: 14px; overflow-x: auto; padding: 4px 2px 18px; }
+  .strip-card{
+    flex: none; width: 214px; text-align: left; cursor: pointer;
+    background: var(--panel); border: 1.5px solid var(--line);
+    border-radius: var(--radius); padding: 18px 20px;
+    display:flex; flex-direction:column; gap: 8px;
+  }
+  .strip-card:hover{ border-color: var(--accent-soft); }
+  .strip-card .d{ font-size: 0.7rem; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+  .strip-card .q{ font-family: var(--serif); font-weight: 600; font-size: 1.02rem; line-height: 1.22; }
+
+  /* ── forms ────────────────────────────── */
+  .panel{
+    background: var(--panel); border: 1.5px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 34px 36px;
+  }
+  .cols{ display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+  }
+  .input, textarea, input[type=text], input[type=password], select{
+    width:100%; font-family: var(--sans); font-size: 0.97rem;
+    padding: 11px 15px; border-radius: 12px;
+    border: 1.5px solid #b9c2d3; background: #e7ebf3; color: var(--ink);
+  }
+  textarea{ resize: vertical; min-height: 62px; }
+  .input:focus, textarea:focus, input:focus, select:focus{ outline:none; border-color: var(--accent); }
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cat-add{ display:flex; gap: 8px; margin-top: 8px; }
+  .status{ min-height: 20px; font-size: 0.85rem; color: var(--accent-deep); font-weight: 600; margin-top: 10px; }
+  .sticky{ position: sticky; top: 20px; }
+
+  /* ── challenge ────────────────────────── */
+  .challenge{ display:grid; grid-template-columns: 1.05fr 0.95fr; gap: 44px; align-items: start; }
+  .opt{
+    display:flex; align-items:center; gap: 15px; width: 100%; text-align:left;
+    cursor:pointer; font-size: 1.02rem; font-weight: 600; color: var(--ink);
+    background: var(--bg); border: 2px solid var(--line); border-radius: 999px;
+    padding: 9px 20px 9px 9px; box-shadow: var(--shadow-sm); margin-bottom: 12px;
+    transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+  }
+  .opt:hover:not(:disabled){ transform: translateX(6px); border-color: var(--accent-soft); box-shadow: var(--shadow-md); }
+  .opt:disabled{ cursor: default; }
+  .opt .letter{
+    flex:none; width: 38px; height: 38px; border-radius: 999px;
+    background: var(--indigo); color:#fffdf8; font-family: var(--serif);
+    font-weight: 600; font-size: 1.02rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .opt .mark{ margin-left: auto; font-family: var(--serif); font-size: 1.1rem; }
+  .opt.correct{ border-color: var(--ok); background: #eef2ec; }
+  .opt.wrong{ border-color: var(--danger); background: #f8e9e5; }
+  .hint{
+    margin: 0 0 8px; font-size: 0.9rem; background: var(--accent-soft);
+    color: var(--accent-deep); border-radius: 12px; padding: 11px 15px;
+  }
+  .verdict{ border-radius: var(--radius); padding: 20px 22px; margin-top: 10px;
+    display:flex; flex-direction:column; gap: 10px; animation: rise .35s ease both; }
+  .verdict.correct{ background: #eef2ec; }
+  .verdict.wrong{ background: var(--accent-soft); }
+  .verdict h4{ font-family: var(--serif); font-weight: 600; font-size: 1.2rem; margin: 0; }
+
+  /* ── misc ─────────────────────────────── */
   .empty{
-    text-align:center;
-    color: var(--muted);
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.9rem;
-    padding: 30px 10px;
+    color: var(--muted); font-size: 0.93rem; padding: 30px 34px;
+    background: var(--panel-2); border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius); max-width: 620px;
   }
+  .cta-card{
+    background: #fdeee2; border: 2px solid var(--accent-soft);
+    border-radius: var(--radius); padding: 26px 28px;
+    display:flex; flex-direction:column; gap: 12px; justify-content:center;
+  }
+  .cta-card h4{ margin:0; font-size: 1.18rem; font-weight: 700; color: var(--accent-deep); line-height: 1.25; }
+  .cta-card p{ margin:0; font-size: 0.88rem; color: var(--accent-deep); }
+  .stack{ display:flex; flex-direction:column; gap: 16px; max-width: 860px; }
+  .saved-row{
+    background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); padding: 22px 26px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap: 22px;
+  }
+  .pending{ border-left: 4px solid var(--line-strong); }
+  .backup-bar{ display:flex; gap: 8px; justify-content:flex-end; margin-bottom: 14px; }
+  .lock{ max-width: 420px; }
+  .lock-row{ display:flex; gap: 8px; }
+  .detail{ display:grid; grid-template-columns: 240px 1fr; gap: 44px; align-items: start; }
+  .book-head{ display:grid; grid-template-columns: 240px 1fr; gap: 44px; align-items: start; }
+  .book-art{ width:100%; aspect-ratio: 3/4; border-radius: var(--radius); overflow:hidden;
+    background: var(--panel-2); display:flex; align-items:center; justify-content:center; }
+  .book-art img{ width:100%; height:100%; object-fit: cover; filter: saturate(0.82) contrast(0.94); }
+  .book-list{ display:flex; flex-direction:column; gap: 20px; }
+  .book-list .quote{ font-family: var(--serif); font-weight: 600; font-size: 1.32rem;
+    line-height: 1.2; margin: 0 0 5px; cursor:pointer; text-wrap: pretty; }
+  .book-list .quote:hover{ color: var(--accent-deep); }
 
-  .status{
-    text-align:center;
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.8rem;
-    color: var(--gold);
-    height: 18px;
-    margin-top: 8px;
-  }
-
-  .lock-card{
-    text-align:center;
-  }
-  .lock-card p{
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-top: 0;
-  }
-  .lock-row{
-    display:flex;
-    gap:8px;
-  }
-  .signout{
-    display:block;
-    margin: 18px auto 0;
-    background:none;
-    border:none;
-    color: var(--muted);
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 0.78rem;
-    cursor:pointer;
-    text-decoration: underline;
+  @media (max-width: 900px){
+    .hero{ flex-direction: column; }
+    .cols, .challenge, .detail, .book-head{ grid-template-columns: 1fr; gap: 28px; }
+    .entry.wide{ grid-column: auto; }
+    .hero-quote{ font-size: 2rem; }
+    .hero-blob{ display:none; }
+    .sticky{ position: static; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>"like a leaf on still water..."</h1>
-    <p>Simile Collector</p>
-  </header>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="library">Library</button>
-    <button class="tab" data-tab="add">Add a Simile</button>
-    <button class="tab" data-tab="review">Review <span class="badge" id="pendingBadge" style="display:none;">0</span></button>
-    <button class="tab" data-tab="daily">Daily Challenge</button>
+  <div class="nav">
+    <button class="brand" id="brandBtn">Simile Collector<span>A library of similes from books old and new</span></button>
+    <div class="tabs">
+      <button class="tab active" data-tab="home">Today</button>
+      <button class="tab" data-tab="daily">Daily Challenge</button>
+      <button class="tab" data-tab="library">Library</button>
+      <button class="tab" data-tab="saved">Saved <span class="badge" id="savedBadge" style="display:none;">0</span></button>
+      <button class="tab" data-tab="add">Add a Simile</button>
+      <button class="tab" data-tab="review" id="reviewTab" style="display:none;">Review <span class="badge" id="pendingBadge" style="display:none;">0</span></button>
+    </div>
   </div>
 
-  <!-- LIBRARY VIEW -->
-  <div class="view active" id="view-library">
-    <input type="text" id="searchInput" class="search-box" placeholder="Search by author, book, or category...">
+  <!-- ══ TODAY ══ -->
+  <div class="view active" id="view-home">
+    <div class="section">
+      <p class="eyebrow" id="todayDate">Today’s simile</p>
+      <div class="hero-holder">
+        <div class="hero-blob"></div>
+        <div class="hero" id="heroCard"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Recent dailies</h2>
+      <p class="sub">The last week of daily similes.</p>
+      <div class="strip" id="recentStrip"></div>
+    </div>
+
+    <div class="section">
+      <h2>Lately in the library</h2>
+      <p class="sub">Newest additions from across the collection, once they’ve been reviewed.</p>
+      <div class="grid" id="latestGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══ LIBRARY ══ -->
+  <div class="view" id="view-library">
+    <h2>Library</h2>
+    <p class="sub" id="libraryCount"></p>
+    <input type="text" id="searchInput" class="search" placeholder="Search by author, book, or category…">
     <div class="filters" id="filters"></div>
-    <div id="list"></div>
+    <div class="grid" id="list"></div>
   </div>
 
-  <!-- ADD VIEW -->
+  <!-- ══ SIMILE DETAIL ══ -->
+  <div class="view" id="view-simile">
+    <button class="btn-quiet" id="backFromSimile">← Back</button>
+    <div class="panel" id="simileDetail" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- ══ BOOK PAGE ══ -->
+  <div class="view" id="view-book">
+    <button class="btn-quiet" id="backFromBook">← Back to library</button>
+    <div class="panel" id="bookPanel" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- ══ DAILY CHALLENGE ══ -->
+  <div class="view" id="view-daily">
+    <div class="row" style="margin-bottom:18px;">
+      <h2 style="margin:0;">Daily Challenge</h2>
+      <span class="spacer"></span>
+      <span class="tag" id="pointsTag" style="background:#dfe1ef;color:var(--indigo);"></span>
+      <span class="tag" id="streakTag" style="background:var(--accent-soft);color:var(--accent-deep);"></span>
+    </div>
+    <p class="sub" id="scoreLine" style="margin-top:-8px;"></p>
+    <div class="panel">
+      <div class="challenge">
+        <div>
+          <p class="eyebrow" id="dailyPrompt">Which book is this from?</p>
+          <p class="hero-quote" id="dailyQuoteText" style="font-size:2.1rem;"></p>
+          <div class="rule" style="margin:18px 0;"></div>
+          <p class="note" id="dailyScore" style="font-size:0.9rem;"></p>
+          <div id="dailyHints" style="margin-top:14px;"></div>
+          <button class="btn btn-sm" id="hintBtn" style="margin-top:6px;">Give me a hint</button>
+        </div>
+        <div>
+          <div id="dailyOptions"></div>
+          <div id="dailyResult" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SAVED ══ -->
+  <div class="view" id="view-saved">
+    <h2>Saved</h2>
+    <p class="sub">Kept in this browser only — no account needed. Clearing your browser data clears the list.</p>
+    <div id="savedList"></div>
+  </div>
+
+  <!-- ══ ADD ══ -->
   <div class="view" id="view-add">
-    <div class="card">
-      <div class="field">
-        <label for="simileText">The simile</label>
-        <textarea id="simileText" placeholder="e.g. Her voice was like honey poured slowly over gravel."></textarea>
-      </div>
-
-      <div class="field">
-        <label for="authorInput">Author</label>
-        <input id="authorInput" type="text" placeholder="e.g. Toni Morrison">
-      </div>
-
-      <div class="row2">
+    <h2>Add a Simile</h2>
+    <p class="sub">Submissions are reviewed before they appear in the Library.</p>
+    <div class="cols">
+      <div>
         <div class="field">
-          <label for="bookInput">Book</label>
-          <input id="bookInput" type="text" placeholder="e.g. Beloved">
+          <label for="simileText">The simile</label>
+          <textarea id="simileText" placeholder="e.g. Her voice was like honey poured slowly over gravel."></textarea>
         </div>
         <div class="field">
-          <label for="chapterInput">Chapter</label>
-          <input id="chapterInput" type="text" placeholder="e.g. Chapter 3">
+          <label for="authorInput">Author</label>
+          <input id="authorInput" type="text" placeholder="e.g. Toni Morrison">
         </div>
-      </div>
-
-      <div class="field">
-        <label for="backgroundInput">Background (optional)</label>
-        <textarea id="backgroundInput" placeholder="A sentence or two on what's happening in the story, or why the comparison works"></textarea>
-      </div>
-
-      <div class="field">
-        <label for="submitterInput">Your name (optional)</label>
-        <input id="submitterInput" type="text" placeholder="So the reviewer knows who sent it">
-      </div>
-
-      <div class="field">
-        <label for="categorySelect">Category</label>
-        <select id="categorySelect"></select>
-        <div class="cat-add">
-          <input id="newCategory" type="text" placeholder="Add a new category">
-          <button class="btn-small" id="addCategoryBtn">Add</button>
+        <div class="row2">
+          <div class="field">
+            <label for="bookInput">Book</label>
+            <input id="bookInput" type="text" placeholder="e.g. Beloved">
+          </div>
+          <div class="field">
+            <label for="chapterInput">Chapter</label>
+            <input id="chapterInput" type="text" placeholder="e.g. Chapter 3">
+          </div>
         </div>
+        <div class="field">
+          <label for="backgroundInput">Background (optional)</label>
+          <textarea id="backgroundInput" placeholder="A sentence or two on what's happening in the story, or why the comparison works"></textarea>
+        </div>
+        <div class="field">
+          <label for="imageInput">Picture link (optional)</label>
+          <input id="imageInput" type="text" placeholder="Paste an image address">
+          <p class="tiny" style="margin-top:7px;">Leave it empty and the simile shows its initial instead. Only use pictures you have the right to use — out-of-copyright illustrations are safest.</p>
+        </div>
+        <div class="field">
+          <label for="submitterInput">Your name (optional)</label>
+          <input id="submitterInput" type="text" placeholder="So the reviewer knows who sent it">
+        </div>
+        <div class="field">
+          <label for="categorySelect">Category</label>
+          <select id="categorySelect"></select>
+          <div class="cat-add">
+            <input id="newCategory" type="text" placeholder="Add a new category">
+            <button class="btn btn-sm" id="addCategoryBtn">Add</button>
+          </div>
+        </div>
+        <button class="btn btn-sage btn-block" id="saveBtn">Submit simile</button>
+        <div class="status" id="status"></div>
       </div>
-
-      <button class="btn-main" id="saveBtn">Submit Simile</button>
-      <div class="status" id="status"></div>
-      <p style="font-family:Helvetica,Arial,sans-serif;font-size:0.75rem;color:#8a8880;text-align:center;margin-top:10px;">
-        Submissions are reviewed before they appear in the Library.
-      </p>
+      <div class="sticky">
+        <p class="eyebrow">How it will look</p>
+        <div class="entry" id="addPreview"></div>
+      </div>
     </div>
   </div>
 
-  <!-- REVIEW VIEW -->
+  <!-- ══ REVIEW ══ -->
   <div class="view" id="view-review">
-    <div class="card lock-card" id="lockCard">
-      <label for="pinInput" style="text-align:center;">Enter the review PIN</label>
-      <div class="lock-row">
-        <input id="pinInput" type="password" placeholder="PIN">
-        <button class="btn-small" id="unlockBtn">Unlock</button>
+    <h2>Review</h2>
+    <p class="sub">Approve or reject what people have sent in.</p>
+    <div class="panel lock" id="lockCard">
+      <div class="field">
+        <label for="pinInput">Enter the review password</label>
+        <div class="lock-row">
+          <input id="pinInput" type="password" placeholder="Password">
+          <button class="btn btn-sm" id="unlockBtn">Unlock</button>
+        </div>
       </div>
     </div>
-    <div id="reviewList" style="display:none;"></div>
     <div class="backup-bar" id="backupBar" style="display:none;">
-      <button class="btn-small" id="exportBtn">Download a backup</button>
-      <button class="btn-small" id="importBtn">Load a backup</button>
+      <button class="btn btn-sm" id="exportBtn">Download a backup</button>
+      <button class="btn btn-sm" id="importBtn">Load a backup</button>
       <input type="file" id="importFile" accept=".json" style="display:none;">
     </div>
-    <button class="signout" id="lockAgainBtn" style="display:none;">Lock review screen</button>
+    <div class="stack" id="reviewList" style="display:none;"></div>
+    <button class="btn-quiet" id="lockAgainBtn" style="display:none;margin-top:18px;">Lock review screen</button>
   </div>
-
-        <!-- DAILY CHALLENGE VIEW -->
-      <div class="view" id="view-daily">
-              <div class="card daily-card">
-                          <p class="daily-eyebrow">&#9733; Today's Challenge &#9733;</p>
-                          <p id="dailyQuoteText" class="daily-quote"></p>
-                          <p class="daily-instruction">Which book is this from?</p>
-                          <div id="dailyOptions" class="daily-options"></div>
-                          <div id="dailyResult" class="daily-result" style="display:none;"></div>
-              </div>
-      </div>
-              </div>
 
 </div>
 
 <script>
 const DEFAULT_CATEGORIES = ["Nature", "Emotion", "People", "Place", "Time", "Other"];
-const REVIEW_PIN = "3256";
 
+/* Category colours — the dot, the tag fill, the fallback initial */
+const CATEGORY_COLOURS = {
+  Nature:  { dot:"#93a377", bg:"#d5e0c2", fg:"#48553a" },
+  Emotion: { dot:"#b2622d", bg:"#f3d8c4", fg:"#7a3f14" },
+  People:  { dot:"#8a5b7a", bg:"#e5d5e2", fg:"#5c3f57" },
+  Place:   { dot:"#54648a", bg:"#d6dcea", fg:"#3f4a63" },
+  Time:    { dot:"#8c491a", bg:"#f0dac9", fg:"#7a4116" },
+  Other:   { dot:"#6d7f7a", bg:"#d8e2df", fg:"#3d4f4b" }
+};
+const FALLBACK_COLOUR = { dot:"#8a8378", bg:"#e8e2d8", fg:"#4a443c" };
+function colourFor(cat){ return CATEGORY_COLOURS[cat] || FALLBACK_COLOUR; }
+
+/* Out-of-copyright illustrations, by book. Add a title here and every simile
+   from that book picks up the picture automatically. Books still in copyright
+   show a tinted initial instead, or a picture a submitter supplies. */
+const P = "https://commons.wikimedia.org/wiki/Special:FilePath/";
+const BOOK_ART = {
+  "A Christmas Carol": { url: P + "Marley%27s%20Ghost-John%20Leech%2C%201843.jpg?width=700", credit: "John Leech, 1843 — public domain" },
+  "Alice's Adventures in Wonderland": { url: P + "Alice%20in%20Wonderland%20by%20Arthur%20Rackham%20-%2008%20-%20A%20Mad%20Tea-Party.jpg?width=700", credit: "Arthur Rackham, 1907 — public domain" },
+  "I Wandered Lonely as a Cloud": { url: P + "J%20M%20W%20Turner%20-%20Ullswater%20from%20Gobarrow%20Park.jpg?width=700", credit: "J. M. W. Turner — public domain" },
+  "Moby-Dick": { url: P + "Moby%20Dick%20p510%20illustration.jpg?width=700", credit: "1892 edition — public domain" },
+  "Frankenstein": { url: P + "Frontispiece%20to%20Frankenstein%201831.jpg?width=700", credit: "Theodor von Holst, 1831 — public domain" },
+  "Treasure Island": { url: P + "Treasure%20Island-Scribner%27s-1911.jpg?width=700", credit: "N. C. Wyeth, 1911 — public domain" },
+  "Dracula": { url: P + "Dracula1st.jpeg?width=700", credit: "1897 first edition — public domain" },
+  "Adventures of Huckleberry Finn": { url: P + "Huckleberry%20Finn%20book.JPG?width=700", credit: "E. W. Kemble, 1884 — public domain" },
+  "The Great Gatsby": { url: P + "The%20Great%20Gatsby%20Cover%201925%20Retouched.jpg?width=700", credit: "Francis Cugat, 1925 — public domain" },
+  "Paradise Lost": { url: P + "Paradise%20Lost%2012.jpg?width=700", credit: "Gustave Doré — public domain" }
+};
+
+let categories = [...DEFAULT_CATEGORIES];
+let entries = []; // {id, text, author, book, chapter, background, image, category, submitter, status}
+let activeFilter = "All";
+let unlocked = false;
+let currentView = "home";
+let lastView = "home";
+
+const $ = (id) => document.getElementById(id);
+
+function showStatus(msg){
+  const el = $("status");
+  el.textContent = msg;
+  setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2600);
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str == null ? "" : str;
+  return d.innerHTML;
+}
+
+/* ── shared storage (unchanged: private Worker holds the token) ── */
+const WORKER_API = "https://dailysimileappstorage.dailysimile3.workers.dev";
+let blobCache = null;
+
+async function fetchBlob(){
+  const res = await fetch(WORKER_API, { cache: "no-store" });
+  if(res.status === 403) throw new Error("RATE_LIMITED");
+  if(!res.ok) throw new Error("Shared storage request failed");
+  return await res.json();
+}
+async function storageGet(key){
+  if(blobCache === null){ blobCache = await fetchBlob(); }
+  return Object.prototype.hasOwnProperty.call(blobCache, key) ? blobCache[key] : null;
+}
+/* The review password is never stored in this file. You type it once; it is
+   held for the browser session only and sent with each save, and the worker
+   is what actually checks it. */
+const REVIEW_KEY_STORE = "simile-collector:reviewkey";
+function reviewKey(){
+  try{ return sessionStorage.getItem(REVIEW_KEY_STORE) || ""; }catch(e){ return ""; }
+}
+function setReviewKey(key){
+  try{ if(key) sessionStorage.setItem(REVIEW_KEY_STORE, key); else sessionStorage.removeItem(REVIEW_KEY_STORE); }catch(e){}
+}
+async function storageSet(key, value){
+  blobCache = await fetchBlob();
+  blobCache[key] = value;
+  const putRes = await fetch(WORKER_API, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "X-Review-Key": reviewKey() },
+    body: JSON.stringify({ content: blobCache })
+  });
+  if(putRes.status === 401) throw new Error("NOT_REVIEWER");
+  if(putRes.status === 403) throw new Error("RATE_LIMITED");
+  if(!putRes.ok) throw new Error("Save request failed");
+}
+
+/* Visitors never get write access. A submission goes to its own worker route,
+   which can only ever append one entry marked "pending". */
+async function submitEntry(entry){
+  const res = await fetch(WORKER_API + "/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ entry })
+  });
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok) throw new Error(data.error || "Couldn't send that — try again");
+  return data;
+}
+async function saveCategories(){
+  try{ await storageSet("simile-categories", JSON.stringify(categories)); }
+  catch(e){ showStatus(
+    e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again"
+    : e.message === "NOT_REVIEWER" ? "Only the reviewer can add a category"
+    : "Couldn't save category"); }
+}
+async function saveEntries(){
+  try{ await storageSet("simile-entries", JSON.stringify(entries)); }
+  catch(e){ showStatus(
+    e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again"
+    : e.message === "NOT_REVIEWER" ? "Unlock the review screen first — your session may have expired"
+    : "Couldn't save — try again"); }
+}
+
+/* ── saved list: this browser only ── */
+const SAVED_KEY = "simile-collector:saved";
+let savedIds = [];
+function loadSaved(){
+  try{ const raw = localStorage.getItem(SAVED_KEY); if(raw) savedIds = JSON.parse(raw) || []; }
+  catch(e){ savedIds = []; }
+}
+function persistSaved(){
+  try{ localStorage.setItem(SAVED_KEY, JSON.stringify(savedIds)); }catch(e){}
+}
+function isSaved(id){ return savedIds.indexOf(id) !== -1; }
+function toggleSaved(id){
+  savedIds = isSaved(id) ? savedIds.filter(x => x !== id) : savedIds.concat(id);
+  persistSaved();
+  updateSavedBadge();
+  renderLibrary();
+  renderHome();
+  renderSaved();
+  if(currentView === "simile" && detailId) renderSimileDetail(detailId);
+}
+function updateSavedBadge(){
+  const b = $("savedBadge");
+  if(savedIds.length){ b.style.display = "inline-block"; b.textContent = savedIds.length; }
+  else { b.style.display = "none"; }
+}
+
+/* ── shared pieces ── */
+function sourceLine(e){
+  const bits = [];
+  if(e.author) bits.push(e.author);
+  if(e.book) bits.push(e.book);
+  if(e.chapter) bits.push(e.chapter);
+  return bits.length ? bits.join(" · ") : "Unknown source";
+}
+function artFor(e){ return e.image ? { url: e.image, credit: e.imageCredit || "" } : (BOOK_ART[e.book] || null); }
+function initialOf(e){
+  return (e.text || "?").replace(/^[^A-Za-z]*/, "").charAt(0).toUpperCase() || "?";
+}
+/* If a picture link is dead, fall back to the initial circle and drop the
+   credit line — a broken link must never leave an empty disc with an
+   attribution for art that isn't there. */
+function artFail(img){
+  const holder = img.parentNode;
+  if(!holder) return;
+  holder.removeChild(img);
+  holder.style.background = holder.getAttribute("data-bg") || "var(--panel-2)";
+  holder.style.color = holder.getAttribute("data-fg") || "var(--muted)";
+  holder.textContent = holder.getAttribute("data-initial") || "?";
+  const card = holder.closest(".entry, .hero, .panel, .saved-row, .book-head") || document;
+  card.querySelectorAll(".art-credit").forEach(el => { el.style.display = "none"; });
+}
+window.artFail = artFail;
+function artHtml(e, size){
+  const art = artFor(e);
+  const c = colourFor(e.category);
+  const initial = escapeHtml(initialOf(e));
+  if(art) return '<div class="art ' + size + '" data-initial="' + initial + '" data-bg="' + c.bg + '" data-fg="' + c.fg + '">' +
+    '<img src="' + escapeHtml(art.url) + '" alt="" loading="lazy" onerror="artFail(this)"></div>';
+  return '<div class="art ' + size + '" style="background:' + c.bg + ';color:' + c.fg + '">' + initial + '</div>';
+}
+function tagHtml(cat){
+  const c = colourFor(cat);
+  return '<span class="tag" style="background:' + c.bg + ';color:' + c.fg + '">' + escapeHtml(cat || "Other") + '</span>';
+}
+function saveBtnHtml(e){
+  const on = isSaved(e.id);
+  return '<button class="btn btn-sm btn-save' + (on ? " on" : "") + '" data-save="' + escapeHtml(e.id) + '">' + (on ? "Saved" : "Save") + '</button>';
+}
+function firstSentence(str){
+  if(!str) return "";
+  const m = str.match(/^.{0,150}?[.!?](\s|$)/);
+  const out = (m ? m[0] : str.slice(0, 130)).trim();
+  return out.length < str.trim().length ? out + "…" : out;
+}
+function approvedEntries(){ return entries.filter(e => !e.status || e.status === "approved"); }
+function entryById(id){ return entries.filter(e => e.id === id)[0] || null; }
+
+function wireCard(el){
+  el.querySelectorAll("[data-save]").forEach(b => {
+    b.onclick = (ev) => { ev.stopPropagation(); toggleSaved(b.getAttribute("data-save")); };
+  });
+  el.querySelectorAll("[data-book]").forEach(b => {
+    b.onclick = (ev) => { ev.stopPropagation(); showBook(b.getAttribute("data-book")); };
+  });
+  el.querySelectorAll("[data-open]").forEach(b => {
+    b.onclick = (ev) => { ev.stopPropagation(); showSimile(b.getAttribute("data-open")); };
+  });
+}
+
+function entryCardHtml(e, opts){
+  opts = opts || {};
+  const teaser = e.background ? '<p class="teaser">' + escapeHtml(firstSentence(e.background)) + '</p>' : "";
+  const art = artFor(e);
+  const credit = art && art.credit ? '<p class="tiny art-credit">' + escapeHtml(art.credit) + '</p>' : "";
+  const wide = (e.text || "").length > 150 ? " wide" : "";
+  return '<div class="entry' + wide + (opts.className ? " " + opts.className : "") + '">' +
+    artHtml(e, "art-lg") +
+    '<p class="quote" data-open="' + escapeHtml(e.id) + '">' + escapeHtml(e.text) + '</p>' +
+    tagHtml(e.category) +
+    '<p class="meta">' + escapeHtml(e.author || "Unknown") +
+      (e.book ? ' · <button class="book-link" data-book="' + escapeHtml(e.book) + '">' + escapeHtml(e.book) + '</button>' : "") +
+      (e.chapter ? ' · ' + escapeHtml(e.chapter) : "") + '</p>' +
+    teaser + credit +
+    '<div class="row" style="margin-top:4px;">' + saveBtnHtml(e) + '</div>' +
+  '</div>';
+}
+
+/* ── TODAY ── */
+function pickDailySimile(offsetDays){
+  const pool = approvedEntries();
+  if(!pool.length) return null;
+  const d = new Date();
+  d.setDate(d.getDate() - (offsetDays || 0));
+  const day = d.toISOString().slice(0,10);
+  let hash = 0;
+  for(let i=0;i<day.length;i++){ hash = (hash*31 + day.charCodeAt(i)) >>> 0; }
+  return pool[hash % pool.length];
+}
+
+function renderHome(){
+  const today = pickDailySimile(0);
+  $("todayDate").textContent = "Today’s simile · " + new Date().toLocaleDateString(undefined, {day:"numeric", month:"long"});
+
+  const hero = $("heroCard");
+  if(!today){
+    hero.innerHTML = '<p class="note">No similes yet. Add one and it will appear here.</p>';
+  } else {
+    const art = artFor(today);
+    hero.innerHTML =
+      artHtml(today, "art-xl") +
+      '<div class="hero-body">' +
+        tagHtml(today.category) +
+        '<p class="hero-quote">' + escapeHtml(today.text) + '</p>' +
+        '<p class="cite">' + escapeHtml(today.author || "Unknown") +
+          '<em>' + (today.book ? " · " + escapeHtml(today.book) : "") + (today.chapter ? " · " + escapeHtml(today.chapter) : "") + '</em></p>' +
+        '<div class="rule"></div>' +
+        (today.background ? '<p class="note">' + escapeHtml(today.background) + '</p>' : "") +
+        (art && art.credit ? '<p class="tiny art-credit">' + escapeHtml(art.credit) + '</p>' : "") +
+        '<div class="row" style="margin-top:6px;">' + saveBtnHtml(today) +
+          '<p class="tiny">Saved similes stay in this browser — no account needed.</p></div>' +
+        '<div class="row"><button class="btn btn-sm" data-open="' + escapeHtml(today.id) + '">Read the background</button>' +
+          '<button class="btn btn-sm" id="toChallenge">Play today’s challenge</button></div>' +
+      '</div>';
+    wireCard(hero);
+    const jump = $("toChallenge");
+    if(jump) jump.onclick = () => switchTab("daily");
+  }
+
+  const strip = $("recentStrip");
+  strip.innerHTML = "";
+  for(let i=1;i<=7;i++){
+    const e = pickDailySimile(i);
+    if(!e) break;
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const div = document.createElement("button");
+    div.className = "strip-card";
+    div.innerHTML =
+      '<span class="d">' + d.toLocaleDateString(undefined,{day:"numeric",month:"short"}).toUpperCase() + '</span>' +
+      '<span class="q">' + escapeHtml(firstSentence(e.text) || e.text) + '</span>' +
+      '<span class="meta">' + escapeHtml(e.author || "Unknown") + '</span>';
+    div.onclick = () => showSimile(e.id);
+    strip.appendChild(div);
+  }
+
+  const latest = $("latestGrid");
+  const recent = approvedEntries().slice(-3).reverse();
+  latest.innerHTML = recent.map(e => entryCardHtml(e)).join("");
+  wireCard(latest);
+}
+
+/* ── LIBRARY ── */
+function renderFilters(){
+  const wrap = $("filters");
+  wrap.innerHTML = "";
+  wrap.appendChild(makeChip("All"));
+  categories.forEach(c => wrap.appendChild(makeChip(c)));
+}
+function makeChip(name){
+  const b = document.createElement("button");
+  const c = name === "All" ? { dot:"#4b5568", bg:"#4b5568", fg:"#fffdf8" } : colourFor(name);
+  const on = activeFilter === name;
+  b.className = "chip";
+  b.style.background = on ? c.dot : "var(--panel)";
+  b.style.color = on ? "#fffdf8" : "var(--ink)";
+  b.style.borderColor = on ? c.dot : "var(--line)";
+  b.innerHTML = '<span class="dot" style="background:' + (on ? "#fffdf8" : c.dot) + '"></span>' + escapeHtml(name);
+  b.onclick = () => { activeFilter = name; renderFilters(); renderLibrary(); };
+  return b;
+}
+
+function renderLibrary(){
+  const list = $("list");
+  if(!list) return;
+  list.innerHTML = "";
+  const approved = approvedEntries();
+  const searchTerm = ($("searchInput").value || "").toLowerCase().trim();
+  const shown = approved.filter(e => {
+    const matchesFilter = activeFilter === "All" || e.category === activeFilter;
+    if(!matchesFilter) return false;
+    if(!searchTerm) return true;
+    return (e.author || "").toLowerCase().includes(searchTerm)
+      || (e.book || "").toLowerCase().includes(searchTerm)
+      || (e.category || "").toLowerCase().includes(searchTerm);
+  });
+
+  const books = new Set(approved.map(e => e.book).filter(Boolean));
+  $("libraryCount").textContent = activeFilter === "All"
+    ? approved.length + " similes from " + books.size + " books."
+    : "Showing " + shown.length + " " + activeFilter + " similes.";
+
+  if(shown.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.style.gridColumn = "1 / -1";
+    empty.textContent = searchTerm
+      ? "No similes match that search."
+      : (approved.length === 0
+        ? "No approved similes yet. Add one, or wait for submissions to be reviewed."
+        : "Nothing approved in this category yet.");
+    list.appendChild(empty);
+    return;
+  }
+
+  list.innerHTML = shown.slice().reverse().map(e => entryCardHtml(e)).join("");
+
+  const cta = document.createElement("div");
+  cta.className = "cta-card";
+  cta.innerHTML = '<h4>Found one while reading?</h4>' +
+    '<p>Send the quote, the chapter, and a line or two about the scene. Add a picture if you have one.</p>' +
+    '<button class="btn btn-primary btn-sm" style="align-self:flex-start;" id="ctaAdd">Add a simile</button>';
+  list.appendChild(cta);
+  $("ctaAdd").onclick = () => switchTab("add");
+  wireCard(list);
+}
+
+/* ── SIMILE DETAIL ── */
+let detailId = null;
+function showSimile(id){
+  detailId = id;
+  renderSimileDetail(id);
+  showView("simile");
+}
+function renderSimileDetail(id){
+  const e = entryById(id);
+  const box = $("simileDetail");
+  if(!e){ box.innerHTML = '<p class="note">That simile is no longer in the collection.</p>'; return; }
+  const art = artFor(e);
+  const sameBook = approvedEntries().filter(x => x.book === e.book && x.id !== e.id).length;
+  box.innerHTML =
+    '<div class="detail">' +
+      '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        artHtml(e, "art-xl").replace("art-xl", "art-xl") +
+        (art && art.credit ? '<p class="tiny art-credit">' + escapeHtml(art.credit) + '</p>' : "") +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:18px;">' +
+        tagHtml(e.category) +
+        '<p class="hero-quote" style="font-size:2.05rem;">' + escapeHtml(e.text) + '</p>' +
+        '<p class="cite">' + escapeHtml(e.author || "Unknown") +
+          '<em>' + (e.book ? " · " + escapeHtml(e.book) : "") + (e.chapter ? " · " + escapeHtml(e.chapter) : "") + '</em></p>' +
+        '<div class="rule"></div>' +
+        (e.background ? '<p class="note">' + escapeHtml(e.background) + '</p>'
+          : '<p class="note" style="font-style:italic;">No background note for this one yet.</p>') +
+        (e.author === "William Shakespeare" ? '<p class="tiny">Spelling as in the original text</p>' : "") +
+        '<div class="row" style="margin-top:4px;">' + saveBtnHtml(e) +
+          (e.book ? '<button class="btn btn-sm" data-book="' + escapeHtml(e.book) + '">' +
+            (sameBook ? sameBook + " more from this book" : "This book’s page") + '</button>' : "") +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  wireCard(box);
+}
+
+/* ── BOOK PAGE ── */
+function showBook(book){
+  const box = $("bookPanel");
+  const all = approvedEntries().filter(e => e.book === book);
+  const art = BOOK_ART[book] || (all.filter(e => e.image)[0] ? { url: all.filter(e => e.image)[0].image, credit: "" } : null);
+  const authors = Array.from(new Set(all.map(e => e.author).filter(Boolean)));
+  box.innerHTML =
+    '<div class="book-head">' +
+      '<div style="display:flex;flex-direction:column;gap:12px;">' +
+        '<div class="book-art">' + (art
+          ? '<img src="' + escapeHtml(art.url) + '" alt="" onerror="artFail(this)">'
+          : '<span style="font-family:var(--serif);font-size:3rem;color:var(--muted)">' + escapeHtml((book||"?").charAt(0)) + '</span>') + '</div>' +
+        (art && art.credit ? '<p class="tiny art-credit">' + escapeHtml(art.credit) + '</p>' : "") +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:24px;">' +
+        '<div>' +
+          '<h3>' + escapeHtml(book) + '</h3>' +
+          '<p class="meta" style="margin-top:6px;">' + escapeHtml(authors.join(", ") || "Unknown author") +
+            ' · ' + all.length + (all.length === 1 ? " simile collected" : " similes collected") + '</p>' +
+        '</div>' +
+        '<div class="book-list">' +
+          all.map(e =>
+            '<div>' +
+              '<p class="quote" data-open="' + escapeHtml(e.id) + '">' + escapeHtml(e.text) + '</p>' +
+              '<div class="row">' +
+                '<span class="meta">' + escapeHtml(e.chapter || "—") + '</span>' + tagHtml(e.category) + saveBtnHtml(e) +
+              '</div>' +
+            '</div>'
+          ).join("") +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  wireCard(box);
+  showView("book");
+}
+
+/* ── DAILY CHALLENGE ── */
+const STREAK_KEY = "simile-collector:streak";
+const SCORE_KEY = "simile-collector:score";
+
+function loadScore(){
+  try{ return JSON.parse(localStorage.getItem(SCORE_KEY)) || { points:0, played:0, right:0, best:0 }; }
+  catch(e){ return { points:0, played:0, right:0, best:0 }; }
+}
+function addScore(points, correct){
+  const s = loadScore();
+  const next = {
+    points: (s.points || 0) + points,
+    played: (s.played || 0) + 1,
+    right: (s.right || 0) + (correct ? 1 : 0),
+    best: Math.max(s.best || 0, points)
+  };
+  try{ localStorage.setItem(SCORE_KEY, JSON.stringify(next)); }catch(e){}
+  return next;
+}
+let dailyState = { picked:null, hints:0, round:0 };
+
+function loadStreak(){
+  try{ return JSON.parse(localStorage.getItem(STREAK_KEY)) || { count:0, last:null }; }
+  catch(e){ return { count:0, last:null }; }
+}
+function bumpStreak(correct){
+  const s = loadStreak();
+  const today = new Date().toISOString().slice(0,10);
+  if(s.last === today) return s;
+  const next = correct ? { count: (s.count || 0) + 1, last: today } : { count: 0, last: today };
+  try{ localStorage.setItem(STREAK_KEY, JSON.stringify(next)); }catch(e){}
+  return next;
+}
+function missingWord(text){
+  const m = (text || "").match(/\b(?:like|as)\s+(?:a|an|the)?\s*([A-Za-z][A-Za-z'-]{3,})/i);
+  return m ? m[1] : null;
+}
+function shuffle(arr){ return arr.slice().sort(() => Math.random() - 0.5); }
+
+function buildRound(){
+  const today = pickDailySimile(0);
+  if(!today) return null;
+  const pool = approvedEntries();
+  const types = ["book", "author", "word"];
+  const day = new Date().toISOString().slice(0,10);
+  let h = 0; for(let i=0;i<day.length;i++){ h = (h*31 + day.charCodeAt(i)) >>> 0; }
+  let type = types[(h + dailyState.round) % types.length];
+
+  const word = missingWord(today.text);
+  if(type === "word" && !word) type = "book";
+
+  let prompt, answer, choices, quote = today.text;
+  if(type === "author"){
+    prompt = "Who wrote it?";
+    answer = today.author;
+    const wrong = [];
+    for(const e of shuffle(pool)){
+      if(e.author && e.author !== answer && wrong.indexOf(e.author) === -1) wrong.push(e.author);
+      if(wrong.length >= 3) break;
+    }
+    choices = shuffle(wrong.concat([answer]));
+  } else if(type === "word"){
+    prompt = "Fill in the missing word";
+    answer = word;
+    quote = today.text.replace(new RegExp("\\b" + word + "\\b"), "______");
+    const others = [];
+    for(const e of shuffle(pool)){
+      const w = missingWord(e.text);
+      if(w && w.toLowerCase() !== answer.toLowerCase() && others.indexOf(w) === -1) others.push(w);
+      if(others.length >= 3) break;
+    }
+    choices = shuffle(others.concat([answer]));
+  } else {
+    prompt = "Which book is this from?";
+    answer = today.book;
+    const wrong = [];
+    for(const e of shuffle(pool)){
+      if(e.book && e.book !== answer && wrong.indexOf(e.book) === -1) wrong.push(e.book);
+      if(wrong.length >= 3) break;
+    }
+    choices = shuffle(wrong.concat([answer]));
+  }
+
+  const hints = [];
+  if(today.category) hints.push("Category: " + today.category + ".");
+  if(type !== "author" && today.author){
+    const alsoBy = approvedEntries().filter(e => e.author === today.author && e.book !== today.book);
+    hints.push(alsoBy.length
+      ? "The same author wrote " + alsoBy[0].book + "."
+      : "The author is " + today.author + ".");
+  } else if(today.book){
+    hints.push("The book is " + today.book + ".");
+  }
+  if(today.chapter) hints.push("It comes from " + today.chapter + ".");
+  const art = artFor(today);
+  if(art && art.credit) hints.push("Illustration: " + art.credit + ".");
+
+  return { entry: today, prompt, answer, choices, quote, hints: hints.slice(0,3) };
+}
+
+let round = null;
+function renderDailyChallenge(reroll){
+  if(reroll || !round) round = buildRound();
+  const streak = loadStreak();
+  const score = loadScore();
+  $("streakTag").textContent = (streak.count || 0) + " day streak";
+  $("pointsTag").textContent = (score.points || 0) + (score.points === 1 ? " point" : " points");
+  const acc = score.played ? Math.round((score.right / score.played) * 100) : 0;
+  $("scoreLine").textContent = score.played
+    ? score.played + (score.played === 1 ? " question answered · " : " questions answered · ") + acc + "% right · best round " + (score.best || 0) + " of 3"
+    : "Your points are kept in this browser — no account needed.";
+
+  if(!round){
+    $("dailyQuoteText").textContent = "No similes yet.";
+    $("dailyOptions").innerHTML = "";
+    $("dailyResult").style.display = "none";
+    $("hintBtn").style.display = "none";
+    return;
+  }
+
+  const done = dailyState.picked !== null;
+  const correct = done && dailyState.picked === round.answer;
+
+  $("dailyPrompt").textContent = round.prompt;
+  $("dailyQuoteText").textContent = round.quote;
+  $("dailyScore").textContent = !done
+    ? "Worth 3 points — each hint costs 1."
+    : (correct ? (3 - dailyState.hints) + " of 3 points." : "No points today.");
+
+  $("dailyHints").innerHTML = round.hints.slice(0, dailyState.hints)
+    .map(h => '<p class="hint">' + escapeHtml(h) + '</p>').join("");
+  const hintBtn = $("hintBtn");
+  hintBtn.style.display = (!done && dailyState.hints < round.hints.length) ? "inline-block" : "none";
+  hintBtn.textContent = dailyState.hints === 0 ? "Give me a hint" : "Another hint";
+  hintBtn.onclick = () => { dailyState.hints++; renderDailyChallenge(false); };
+
+  const letters = ["A","B","C","D"];
+  const opts = $("dailyOptions");
+  opts.innerHTML = "";
+  round.choices.forEach((choice, i) => {
+    const btn = document.createElement("button");
+    btn.className = "opt" + (done && choice === round.answer ? " correct" : "") +
+      (done && choice === dailyState.picked && !correct ? " wrong" : "");
+    btn.disabled = done;
+    btn.innerHTML = '<span class="letter">' + letters[i] + '</span><span>' + escapeHtml(choice) + '</span>' +
+      '<span class="mark">' + (done ? (choice === round.answer ? "✓" : (choice === dailyState.picked ? "✗" : "")) : "") + '</span>';
+    btn.onclick = () => {
+      if(dailyState.picked !== null) return;
+      dailyState.picked = choice;
+      const right = choice === round.answer;
+      bumpStreak(right);
+      addScore(right ? Math.max(0, 3 - dailyState.hints) : 0, right);
+      renderDailyChallenge(false);
+    };
+    opts.appendChild(btn);
+  });
+
+  const res = $("dailyResult");
+  if(!done){ res.style.display = "none"; res.innerHTML = ""; return; }
+  const e = round.entry;
+  res.style.display = "block";
+  res.innerHTML =
+    '<div class="verdict ' + (correct ? "correct" : "wrong") + '">' +
+      '<h4>' + (correct ? "Right — " + escapeHtml(round.answer) : "It was " + escapeHtml(round.answer)) + '</h4>' +
+      '<p class="cite">' + escapeHtml(e.author || "") +
+        '<em>' + (e.book ? " · " + escapeHtml(e.book) : "") + (e.chapter ? " · " + escapeHtml(e.chapter) : "") + '</em></p>' +
+      (e.background ? '<p class="note" style="font-size:0.92rem;">' + escapeHtml(e.background) + '</p>' : "") +
+      '<div class="row">' +
+        '<button class="btn btn-sm" id="playAgain">Another question</button>' +
+        '<button class="btn btn-sm" data-open="' + escapeHtml(e.id) + '">See this simile</button>' +
+        saveBtnHtml(e) +
+      '</div>' +
+    '</div>';
+  wireCard(res);
+  $("playAgain").onclick = () => {
+    dailyState = { picked:null, hints:0, round: dailyState.round + 1 };
+    renderDailyChallenge(true);
+  };
+}
+
+/* ── SAVED ── */
+function renderSaved(){
+  const wrap = $("savedList");
+  if(!wrap) return;
+  const items = savedIds.map(entryById).filter(Boolean);
+  if(!items.length){
+    wrap.innerHTML = '<div class="empty">Nothing saved yet. Press Save on any simile and it will wait for you here.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="stack">' + items.map(e =>
+    '<div class="saved-row">' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        '<p class="quote" style="font-family:var(--serif);font-weight:600;font-size:1.32rem;line-height:1.2;margin:0;cursor:pointer;" data-open="' + escapeHtml(e.id) + '">' + escapeHtml(e.text) + '</p>' +
+        '<div class="row"><span class="meta">' + escapeHtml(sourceLine(e)) + '</span>' + tagHtml(e.category) + '</div>' +
+      '</div>' +
+      '<button class="btn btn-sm" data-save="' + escapeHtml(e.id) + '">Remove</button>' +
+    '</div>').join("") + '</div>';
+  wireCard(wrap);
+}
+
+/* ── ADD: live preview ── */
+function renderAddPreview(){
+  const box = $("addPreview");
+  if(!box) return;
+  const text = ($("simileText").value || "").trim();
+  const author = ($("authorInput").value || "").trim();
+  const book = ($("bookInput").value || "").trim();
+  const chapter = ($("chapterInput").value || "").trim();
+  const background = ($("backgroundInput").value || "").trim();
+  const image = ($("imageInput").value || "").trim();
+  const category = $("categorySelect").value || "Nature";
+  const c = colourFor(category);
+  const art = image ? { url: image } : BOOK_ART[book];
+  const meta = [author, book, chapter].filter(Boolean).join(" · ") || "Author · Book · Chapter";
+  box.innerHTML =
+    (art ? '<div class="art art-lg" data-initial="' + escapeHtml((text.replace(/^[^A-Za-z]*/, "").charAt(0) || "?").toUpperCase()) + '" data-bg="' + c.bg + '" data-fg="' + c.fg + '"><img src="' + escapeHtml(art.url) + '" alt="" onerror="artFail(this)"></div>'
+         : '<div class="art art-lg" style="background:' + c.bg + ';color:' + c.fg + '">' +
+             escapeHtml((text.replace(/^[^A-Za-z]*/, "").charAt(0) || "?").toUpperCase()) + '</div>') +
+    '<p class="quote" style="cursor:default;">' + escapeHtml(text || "Your simile appears here") + '</p>' +
+    tagHtml(category) +
+    '<p class="meta">' + escapeHtml(meta) + '</p>' +
+    '<p class="teaser">' + escapeHtml(background || "The background paragraph shows on the simile’s own page.") + '</p>';
+}
+
+/* ── REVIEW (logic unchanged) ── */
+function renderCategorySelect(){
+  const sel = $("categorySelect");
+  const keep = sel.value;
+  sel.innerHTML = "";
+  categories.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  if(keep && categories.indexOf(keep) !== -1) sel.value = keep;
+}
+
+function updateBadge(){
+  const pendingCount = entries.filter(e => e.status === "pending").length;
+  const badge = $("pendingBadge");
+  const tab = $("reviewTab");
+  const tabHidden = tab && tab.style.display === "none";
+  if(pendingCount > 0 && !tabHidden){ badge.style.display = "inline-block"; badge.textContent = pendingCount; }
+  else { badge.style.display = "none"; }
+}
+
+function renderReview(){
+  const wrap = $("reviewList");
+  wrap.innerHTML = "";
+  const pending = entries.filter(e => e.status === "pending");
+  if(pending.length === 0){
+    wrap.innerHTML = '<div class="empty">No submissions waiting for review.</div>';
+    return;
+  }
+  pending.slice().reverse().forEach(entry => {
+    const div = document.createElement("div");
+    div.className = "panel pending";
+    const submittedBy = entry.submitter ? "Submitted by " + entry.submitter : "Submitted anonymously";
+    div.innerHTML =
+      '<p class="quote" style="font-family:var(--serif);font-weight:600;font-size:1.3rem;line-height:1.22;margin:0 0 12px;">' + escapeHtml(entry.text) + '</p>' +
+      (entry.background ? '<p class="teaser" style="margin-bottom:12px;">' + escapeHtml(entry.background) + '</p>' : "") +
+      (entry.image ? '<div class="art art-sm" style="margin-bottom:12px;" data-initial="' + escapeHtml(initialOf(entry)) + '"><img src="' + escapeHtml(entry.image) + '" alt="" onerror="artFail(this)"></div>' : "") +
+      '<div class="row" style="margin-bottom:6px;"><span class="meta">' + escapeHtml(sourceLine(entry)) + '</span>' + tagHtml(entry.category) + '</div>' +
+      '<p class="meta">' + escapeHtml(submittedBy) + '</p>' +
+      '<div class="row" style="margin-top:14px;">' +
+        '<button class="btn btn-sm btn-sage approve">Approve</button>' +
+        '<button class="btn btn-sm btn-danger reject">Reject</button>' +
+        '<button class="btn btn-sm edit">Edit</button>' +
+      '</div>';
+    div.querySelector(".approve").onclick = () => reviewEntry(entry.id, "approved");
+    div.querySelector(".reject").onclick = () => reviewEntry(entry.id, "rejected");
+    div.querySelector(".edit").onclick = () => renderEditForm(div, entry, renderReview);
+    wrap.appendChild(div);
+  });
+}
+
+function renderEditForm(div, entry, after){
+  div.innerHTML =
+    '<div class="field"><label>Simile text</label><textarea class="edit-text" rows="3">' + escapeHtml(entry.text) + '</textarea></div>' +
+    '<div class="field"><label>Author</label><input class="edit-author" value="' + escapeHtml(entry.author || "") + '"></div>' +
+    '<div class="row2">' +
+      '<div class="field"><label>Book</label><input class="edit-book" value="' + escapeHtml(entry.book || "") + '"></div>' +
+      '<div class="field"><label>Chapter</label><input class="edit-chapter" value="' + escapeHtml(entry.chapter || "") + '"></div>' +
+    '</div>' +
+    '<div class="field"><label>Background</label><textarea class="edit-background" rows="2">' + escapeHtml(entry.background || "") + '</textarea></div>' +
+    '<div class="field"><label>Picture link</label><input class="edit-image" value="' + escapeHtml(entry.image || "") + '"></div>' +
+    '<div class="field"><label>Category</label><select class="edit-category">' +
+      categories.map(c => '<option value="' + escapeHtml(c) + '"' + (c === entry.category ? " selected" : "") + '>' + escapeHtml(c) + '</option>').join("") +
+    '</select></div>' +
+    '<div class="row"><button class="btn btn-sm btn-primary edit-save">Save changes</button>' +
+      '<button class="btn btn-sm edit-cancel">Cancel</button></div>';
+  div.querySelector(".edit-save").onclick = async () => {
+    const text = div.querySelector(".edit-text").value.trim();
+    const author = div.querySelector(".edit-author").value.trim();
+    const book = div.querySelector(".edit-book").value.trim();
+    const chapter = div.querySelector(".edit-chapter").value.trim();
+    const background = div.querySelector(".edit-background").value.trim();
+    const image = div.querySelector(".edit-image").value.trim();
+    const category = div.querySelector(".edit-category").value;
+    if(!text || !author || !book || !chapter){ showStatus("All fields except submitter are required"); return; }
+    entries = entries.map(e => e.id === entry.id ? {...e, text, author, book, chapter, background, image, category} : e);
+    await saveEntries();
+    renderLibrary(); renderHome();
+    if(after) after();
+    showStatus("Simile updated");
+  };
+  div.querySelector(".edit-cancel").onclick = () => { if(after) after(); else renderLibrary(); };
+}
+
+async function reviewEntry(id, decision){
+  if(decision === "rejected"){ entries = entries.filter(e => e.id !== id); }
+  else { entries = entries.map(e => e.id === id ? {...e, status:"approved"} : e); }
+  await saveEntries();
+  renderReview(); renderLibrary(); renderHome(); updateBadge();
+}
+
+async function deleteEntry(id){
+  entries = entries.filter(e => e.id !== id);
+  await saveEntries();
+  renderLibrary(); renderHome();
+  showStatus("Deleted");
+}
+
+/* ── duplicate detection (unchanged) ── */
+function normalizeForCompare(str){
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+}
+function textSimilarity(a, b){
+  const wordsA = new Set(a.split(" ").filter(Boolean));
+  const wordsB = new Set(b.split(" ").filter(Boolean));
+  if(wordsA.size === 0 || wordsB.size === 0) return 0;
+  let shared = 0;
+  wordsA.forEach(w => { if(wordsB.has(w)) shared++; });
+  const union = new Set([...wordsA, ...wordsB]).size;
+  return shared / union;
+}
+function findDuplicate(newText){
+  const normalizedNew = normalizeForCompare(newText);
+  for(const e of entries){
+    if(e.status === "rejected") continue;
+    const normalizedExisting = normalizeForCompare(e.text);
+    if(normalizedExisting === normalizedNew) return e;
+    if(textSimilarity(normalizedNew, normalizedExisting) >= 0.82) return e;
+  }
+  return null;
+}
+
+/* ── views / tabs ── */
+function showView(name){
+  if(name !== currentView && currentView !== "simile" && currentView !== "book") lastView = currentView;
+  currentView = name;
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $("view-" + name).classList.add("active");
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  const tab = document.querySelector("[data-tab='" + name + "']");
+  if(tab) tab.classList.add("active");
+  window.scrollTo(0, 0);
+}
+function switchTab(name){
+  showView(name);
+  if(name === "home") renderHome();
+  if(name === "library") renderLibrary();
+  if(name === "daily") renderDailyChallenge(!round);
+  if(name === "saved") renderSaved();
+  if(name === "add") renderAddPreview();
+  if(name === "review" && unlocked) renderReview();
+}
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.onclick = () => switchTab(tab.dataset.tab);
+});
+/* The Review tab is hidden unless you ask for it: visit the site with
+   #review on the end of the address, or press R three times. Once unlocked
+   with the PIN, this browser remembers and keeps showing the tab. */
+const REVIEW_SEEN_KEY = "simile-collector:reviewer";
+function revealReviewTab(remember){
+  const tab = $("reviewTab");
+  if(tab) tab.style.display = "inline-block";
+  if(remember){ try{ localStorage.setItem(REVIEW_SEEN_KEY, "1"); }catch(e){} }
+}
+(function initReviewAccess(){
+  let remembered = false;
+  try{ remembered = localStorage.getItem(REVIEW_SEEN_KEY) === "1"; }catch(e){}
+  const asked = location.hash.toLowerCase().indexOf("review") !== -1
+    || location.search.toLowerCase().indexOf("review") !== -1;
+  if(remembered || asked) revealReviewTab(false);
+
+  let taps = 0, timer = null;
+  document.addEventListener("keydown", (ev) => {
+    const t = ev.target;
+    if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+    if((ev.key || "").toLowerCase() !== "r") { taps = 0; return; }
+    taps++;
+    clearTimeout(timer);
+    timer = setTimeout(() => { taps = 0; }, 1200);
+    if(taps >= 3){ taps = 0; revealReviewTab(false); switchTab("review"); }
+  });
+})();
+
+$("brandBtn").onclick = () => switchTab("home");
+$("backFromSimile").onclick = () => switchTab(lastView === "simile" ? "library" : lastView);
+$("backFromBook").onclick = () => switchTab("library");
+
+/* ── add form ── */
+["simileText","authorInput","bookInput","chapterInput","backgroundInput","imageInput"].forEach(id => {
+  $(id).addEventListener("input", renderAddPreview);
+});
+$("categorySelect").addEventListener("change", renderAddPreview);
+
+$("saveBtn").onclick = async () => {
+  const text = $("simileText").value.trim();
+  const author = $("authorInput").value.trim();
+  const book = $("bookInput").value.trim();
+  const chapter = $("chapterInput").value.trim();
+
+  if(!text){ showStatus("Write a simile first"); return; }
+  if(!author || !book || !chapter){ showStatus("Author, book, and chapter are all required"); return; }
+
+  const dupe = findDuplicate(text);
+  if(dupe){ showStatus("Looks like this is already in the collection (" + dupe.book + ") — not submitted"); return; }
+
+  const btn = $("saveBtn");
+  btn.disabled = true;
+  showStatus("Sending…");
+  try{
+    await submitEntry({
+      text, author, book, chapter,
+      background: $("backgroundInput").value.trim(),
+      image: $("imageInput").value.trim(),
+      submitter: $("submitterInput").value.trim(),
+      category: $("categorySelect").value
+    });
+  }catch(err){
+    btn.disabled = false;
+    showStatus(err.message);
+    return;
+  }
+  btn.disabled = false;
+
+  ["simileText","authorInput","bookInput","chapterInput","backgroundInput","imageInput","submitterInput"]
+    .forEach(id => { $(id).value = ""; });
+  renderAddPreview();
+  showStatus("Submitted for review");
+
+  // pick the queued entry back up from shared storage
+  blobCache = null;
+  try{
+    const saved = await storageGet("simile-entries");
+    if(saved) entries = JSON.parse(saved);
+    updateBadge();
+    if(unlocked) renderReview();
+  }catch(e){}
+};
+
+$("addCategoryBtn").onclick = async () => {
+  const val = $("newCategory").value.trim();
+  if(!val) return;
+  if(categories.some(c => c.toLowerCase() === val.toLowerCase())){ showStatus("That category already exists"); return; }
+  categories.push(val);
+  await saveCategories();
+  renderCategorySelect();
+  $("categorySelect").value = val;
+  renderFilters();
+  renderAddPreview();
+  $("newCategory").value = "";
+  showStatus("Category added");
+};
+
+/* ── review lock + backup (unchanged) ── */
+$("unlockBtn").onclick = async () => {
+  const typed = $("pinInput").value;
+  if(!typed) return;
+  const btn = $("unlockBtn");
+  btn.disabled = true;
+  btn.textContent = "Checking…";
+  let ok = false;
+  try{
+    const res = await fetch(WORKER_API + "/unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: typed })
+    });
+    ok = res.ok;
+  }catch(e){ ok = false; }
+  btn.disabled = false;
+  btn.textContent = "Unlock";
+
+  if(ok){
+    setReviewKey(typed);
+    unlocked = true;
+    revealReviewTab(true);
+    $("pinInput").value = "";
+    $("lockCard").style.display = "none";
+    $("reviewList").style.display = "flex";
+    $("lockAgainBtn").style.display = "block";
+    $("backupBar").style.display = "flex";
+    renderReview();
+  } else {
+    $("pinInput").value = "";
+    $("pinInput").placeholder = "Wrong password, try again";
+  }
+};
+$("lockAgainBtn").onclick = () => {
+  unlocked = false;
+  setReviewKey("");
+  $("lockCard").style.display = "block";
+  $("reviewList").style.display = "none";
+  $("lockAgainBtn").style.display = "none";
+  $("backupBar").style.display = "none";
+  $("pinInput").value = "";
+};
+$("exportBtn").onclick = () => {
+  const backup = { categories, entries, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "simile-collector-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  showStatus("Backup downloaded");
+};
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (evt) => {
+    try{
+      const backup = JSON.parse(evt.target.result);
+      if(backup.entries){ entries = backup.entries; await saveEntries(); }
+      if(backup.categories){
+        categories = Array.from(new Set([...DEFAULT_CATEGORIES, ...backup.categories]));
+        await saveCategories();
+      }
+      renderCategorySelect(); renderFilters(); renderLibrary(); renderHome(); updateBadge();
+      if(unlocked) renderReview();
+      showStatus("Backup loaded");
+    }catch(err){ showStatus("That file didn't look like a valid backup"); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+};
+$("searchInput").oninput = () => renderLibrary();
+
+/* ── seeds + load (unchanged safety rules) ── */
 const SEED_ENTRIES = [
   {id:"seed-001", text:"A hump like a snow-hill", author:"Herman Melville", book:"Moby-Dick", chapter:"Chapter 133", category:"Nature", status:"approved"},
   {id:"seed-002", text:"...it made the hair on the crown of his head stand up like a tuft of feathers.", author:"Charles Dickens", book:"Great Expectations", chapter:"Chapter 13", category:"People", status:"approved"},
@@ -781,63 +1586,6 @@ const SEED_ENTRIES = [
   {id:"seed-132", text:"In love, a woman is like a lyre that surrenders its secrets only to the hand that knows how to touch its strings.", author:"Honore de Balzac", book:"The Physiology of Marriage", chapter:"Meditation on love", category:"Emotion", status:"approved"}
 ];
 
-
-let categories = [...DEFAULT_CATEGORIES];
-let entries = []; // {id, text, author, chapter, category, submitter, status: 'pending'|'approved'}
-let activeFilter = "All";
-let unlocked = false;
-
-const $ = (id) => document.getElementById(id);
-
-function showStatus(msg){
-  const el = $("status");
-  el.textContent = msg;
-  setTimeout(()=>{ if(el.textContent === msg) el.textContent=""; }, 2000);
-}
-
-// Shared storage now goes through a private Worker, which holds the real
-// GitHub token privately on Cloudflare's side — nothing sensitive lives in
-// this file anymore.
-const WORKER_API = "https://dailysimileappstorage.dailysimile3.workers.dev";
-
-let blobCache = null; // holds all shared data in memory after the first fetch
-
-async function fetchBlob(){
-  const res = await fetch(WORKER_API, { cache: "no-store" });
-  if(res.status === 403){
-    throw new Error("RATE_LIMITED");
-  }
-  if(!res.ok) throw new Error("Shared storage request failed");
-  return await res.json();
-}
-
-async function storageGet(key){
-  if(blobCache === null){
-    blobCache = await fetchBlob();
-  }
-  return Object.prototype.hasOwnProperty.call(blobCache, key) ? blobCache[key] : null;
-}
-
-async function storageSet(key, value){
-  // Always get the freshest copy right before saving, so an old cached
-  // version can never silently overwrite newer changes made elsewhere.
-  blobCache = await fetchBlob();
-  blobCache[key] = value;
-
-  const putRes = await fetch(WORKER_API, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: blobCache })
-  });
-
-  if(putRes.status === 403){
-    throw new Error("RATE_LIMITED");
-  }
-  if(!putRes.ok){
-    throw new Error("Save request failed");
-  }
-}
-
 async function loadData(){
   let entriesLoadedOK = false;
 
@@ -851,20 +1599,15 @@ async function loadData(){
 
   try{
     const saved = await storageGet("simile-entries");
-    if(saved !== null && saved !== undefined){
-      entries = JSON.parse(saved);
-    }
+    if(saved !== null && saved !== undefined){ entries = JSON.parse(saved); }
     entriesLoadedOK = true;
   }catch(e){
     entriesLoadedOK = false;
-    if(e.message === "RATE_LIMITED"){
-      showStatus("Shared storage is briefly busy — wait a minute and refresh");
-    } else {
-      showStatus("Couldn't reach shared storage — showing what's saved on this device for now");
-    }
+    showStatus(e.message === "RATE_LIMITED"
+      ? "Shared storage is briefly busy — wait a minute and refresh"
+      : "Couldn't reach shared storage — showing what's saved on this device for now");
   }
 
-  // Safety check: never let a failed or suspicious load wipe out real data.
   // Only add missing seeds — never overwrite an existing entry, so edits
   // (like Background notes) are never silently reverted.
   if(entriesLoadedOK){
@@ -873,500 +1616,26 @@ async function loadData(){
       const idx = entries.findIndex(e => e.id === seed.id);
       if(idx === -1){
         const dupeByText = entries.some(e => e.text === seed.text && e.id.indexOf("seed-") !== 0);
-        if(!dupeByText){
-          entries.push(seed);
-          changedSeed = true;
-        }
+        if(!dupeByText){ entries.push(seed); changedSeed = true; }
       }
     });
-    if(changedSeed){
-      await saveEntries();
-    }
+    if(changedSeed){ await saveEntries(); }
   } else {
-    // Shared storage couldn't be reached — show what's built into this file
-    // rather than a blank page. This is display-only: nothing gets saved
-    // back, so real shared data can never be overwritten by this fallback.
+    // Display-only fallback: nothing is saved back, so shared data is safe.
     entries = SEED_ENTRIES.slice();
   }
 
+  loadSaved();
+  updateSavedBadge();
   renderCategorySelect();
   renderFilters();
   renderLibrary();
+  renderHome();
+  renderSaved();
+  renderAddPreview();
   updateBadge();
   if(unlocked) renderReview();
 }
-
-async function saveCategories(){
-  try{
-    await storageSet("simile-categories", JSON.stringify(categories));
-  }catch(e){
-    showStatus(e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again" : "Couldn't save category");
-  }
-}
-
-async function saveEntries(){
-  try{
-    await storageSet("simile-entries", JSON.stringify(entries));
-  }catch(e){
-    showStatus(e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again" : "Couldn't save — try again");
-  }
-}
-
-function renderCategorySelect(){
-  const sel = $("categorySelect");
-  sel.innerHTML = "";
-  categories.forEach(c=>{
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    sel.appendChild(opt);
-  });
-}
-
-function renderFilters(){
-  const wrap = $("filters");
-  wrap.innerHTML = "";
-  wrap.appendChild(makeChip("All"));
-  categories.forEach(c=> wrap.appendChild(makeChip(c)));
-}
-
-function makeChip(name){
-  const b = document.createElement("button");
-  b.className = "chip" + (activeFilter === name ? " active" : "");
-  b.textContent = name;
-  b.onclick = ()=>{ activeFilter = name; renderFilters(); renderLibrary(); };
-  return b;
-}
-
-function escapeHtml(str){
-  const d = document.createElement("div");
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-function renderLibrary(){
-  const list = $("list");
-  list.innerHTML = "";
-  const approved = entries.filter(e => e.status === "approved");
-  const searchTerm = ($("searchInput").value || "").toLowerCase().trim();
-  const shown = approved.filter(e => {
-    const matchesFilter = activeFilter === "All" || e.category === activeFilter;
-    if(!matchesFilter) return false;
-    if(!searchTerm) return true;
-    return (e.author || "").toLowerCase().includes(searchTerm)
-      || (e.book || "").toLowerCase().includes(searchTerm)
-      || (e.category || "").toLowerCase().includes(searchTerm);
-  });
-
-  if(shown.length === 0){
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = searchTerm
-      ? "No similes match that search."
-      : (approved.length === 0
-        ? "No approved similes yet. Add one, or wait for submissions to be reviewed."
-        : "Nothing approved in this category yet.");
-    list.appendChild(empty);
-    return;
-  }
-
-  shown.slice().reverse().forEach(entry=>{
-    const div = document.createElement("div");
-    div.className = "entry";
-    const sourceBits = [];
-    if(entry.author) sourceBits.push(entry.author);
-    if(entry.book) sourceBits.push(entry.book);
-    if(entry.chapter) sourceBits.push(entry.chapter);
-    const sourceText = sourceBits.length ? sourceBits.join(" · ") : "Unknown source";
-    const spellingNote = entry.author === "William Shakespeare"
-      ? `<p class="spelling-note">Spelling as in the original text</p>`
-      : "";
-    const backgroundNote = entry.background
-      ? `<p class="background-note">${escapeHtml(entry.background)}</p>`
-      : "";
-
-    div.innerHTML = `
-      <div class="entry-actions">
-        <button class="edit" title="Edit this simile">Edit</button>
-        <button class="delete" title="Delete this simile">&times;</button>
-      </div>
-      <p class="quote">${escapeHtml(entry.text)}</p>
-      ${spellingNote}
-      ${backgroundNote}
-      <div class="meta">
-        <span class="source">${escapeHtml(sourceText)}</span>
-        <span class="tag">${escapeHtml(entry.category)}</span>
-      </div>
-    `;
-    div.querySelector(".delete").onclick = ()=> deleteEntry(entry.id);
-    div.querySelector(".edit").onclick = ()=> renderEditForm(div, entry);
-    list.appendChild(div);
-  });
-}
-
-function renderEditForm(div, entry){
-  div.innerHTML = `
-    <div class="edit-form">
-      <label>Simile text</label>
-      <textarea class="edit-text" rows="3">${escapeHtml(entry.text)}</textarea>
-      <label>Author</label>
-      <input class="edit-author" value="${escapeHtml(entry.author || "")}">
-      <label>Book</label>
-      <input class="edit-book" value="${escapeHtml(entry.book || "")}">
-      <label>Chapter</label>
-      <input class="edit-chapter" value="${escapeHtml(entry.chapter || "")}">
-      <label>Background (optional)</label>
-      <textarea class="edit-background" rows="2">${escapeHtml(entry.background || "")}</textarea>
-      <label>Category</label>
-      <select class="edit-category">
-        ${categories.map(c => `<option value="${escapeHtml(c)}" ${c === entry.category ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
-      </select>
-      <div class="edit-form-actions">
-        <button class="btn-small edit-save">Save changes</button>
-        <button class="btn-small edit-cancel">Cancel</button>
-      </div>
-    </div>
-  `;
-  div.querySelector(".edit-save").onclick = async ()=>{
-    const text = div.querySelector(".edit-text").value.trim();
-    const author = div.querySelector(".edit-author").value.trim();
-    const book = div.querySelector(".edit-book").value.trim();
-    const chapter = div.querySelector(".edit-chapter").value.trim();
-    const background = div.querySelector(".edit-background").value.trim();
-    const category = div.querySelector(".edit-category").value;
-    if(!text || !author || !book || !chapter){
-      showStatus("All fields except submitter are required");
-      return;
-    }
-    entries = entries.map(e => e.id === entry.id ? {...e, text, author, book, chapter, background, category} : e);
-    await saveEntries();
-    renderLibrary();
-    showStatus("Simile updated");
-  };
-  div.querySelector(".edit-cancel").onclick = ()=> renderLibrary();
-}
-
-function updateBadge(){
-  const pendingCount = entries.filter(e=>e.status === "pending").length;
-  const badge = $("pendingBadge");
-  if(pendingCount > 0){
-    badge.style.display = "inline-block";
-    badge.textContent = pendingCount;
-  } else {
-    badge.style.display = "none";
-  }
-}
-
-function renderReview(){
-  const wrap = $("reviewList");
-  wrap.innerHTML = "";
-  const pending = entries.filter(e => e.status === "pending");
-
-  if(pending.length === 0){
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = "No submissions waiting for review.";
-    wrap.appendChild(empty);
-    return;
-  }
-
-  pending.slice().reverse().forEach(entry=>{
-    const div = document.createElement("div");
-    div.className = "entry pending";
-    const sourceBits = [];
-    if(entry.author) sourceBits.push(entry.author);
-    if(entry.book) sourceBits.push(entry.book);
-    if(entry.chapter) sourceBits.push(entry.chapter);
-    const sourceText = sourceBits.length ? sourceBits.join(" · ") : "Unknown source";
-    const submittedBy = entry.submitter ? `Submitted by ${entry.submitter}` : "Submitted anonymously";
-    const backgroundNote = entry.background
-      ? `<p class="background-note">${escapeHtml(entry.background)}</p>`
-      : "";
-
-    div.innerHTML = `
-      <p class="quote">${escapeHtml(entry.text)}</p>
-      ${backgroundNote}
-      <div class="meta">
-        <span class="source">${escapeHtml(sourceText)}</span>
-        <span class="tag">${escapeHtml(entry.category)}</span>
-      </div>
-      <div class="meta"><span>${escapeHtml(submittedBy)}</span></div>
-      <div class="review-actions">
-        <button class="btn-approve">Approve</button>
-        <button class="btn-reject">Reject</button>
-      </div>
-    `;
-    div.querySelector(".btn-approve").onclick = ()=> reviewEntry(entry.id, "approved");
-    div.querySelector(".btn-reject").onclick = ()=> reviewEntry(entry.id, "rejected");
-    wrap.appendChild(div);
-  });
-}
-
-async function reviewEntry(id, decision){
-  if(decision === "rejected"){
-    entries = entries.filter(e => e.id !== id);
-  } else {
-    entries = entries.map(e => e.id === id ? {...e, status:"approved"} : e);
-  }
-  await saveEntries();
-  renderReview();
-  renderLibrary();
-  updateBadge();
-}
-
-async function deleteEntry(id){
-  entries = entries.filter(e=>e.id !== id);
-  await saveEntries();
-  renderLibrary();
-  showStatus("Deleted");
-}
-
-                           function pickDailySimile(){
-                               const pool = entries.filter(e => !e.status || e.status === "approved");
-                               if(!pool.length) return null;
-                               const day = new Date().toISOString().slice(0,10);
-                               let hash = 0;
-                               for(let i=0;i<day.length;i++){ hash = (hash*31 + day.charCodeAt(i)) >>> 0; }
-                               return pool[hash % pool.length];
-                           }
-  
-                               function renderDailyChallenge(){
-                                   const quoteEl = document.getElementById("dailyQuoteText");
-                                   const optionsEl = document.getElementById("dailyOptions");
-                                   const resultEl = document.getElementById("dailyResult");
-                                   const todays = pickDailySimile();
-                                   if(!todays){
-                                         quoteEl.textContent = "No similes yet.";
-                                         optionsEl.innerHTML = "";
-                                         resultEl.style.display = "none";
-                                         return;
-                                   }
-                                   quoteEl.textContent = todays.text;
-                                   resultEl.style.display = "none";
-                                   resultEl.innerHTML = "";
-                                   const others = entries.filter(e => e.book !== todays.book);
-                                   const shuffled = others.slice().sort(() => Math.random() - 0.5);
-                                   const wrongBooks = [];
-                                   for(const e of shuffled){
-                                         if(!wrongBooks.includes(e.book)){ wrongBooks.push(e.book); }
-                                         if(wrongBooks.length >= 3) break;
-                                   }
-                                   const choices = wrongBooks.concat([todays.book]).sort(() => Math.random() - 0.5);
-                                   const letters = ["A","B","C","D"];
-                                   optionsEl.innerHTML = "";
-                                   const buttons = [];
-                                   choices.forEach((book, i) => {
-                                         const btn = document.createElement("button");
-                                         btn.className = "daily-option";
-                                         btn.innerHTML = '<span class="daily-option-letter">' + letters[i] + '</span><span>' + escapeHtml(book) + '</span>';
-                                         btn.onclick = () => {
-                                                 const correct = book === todays.book;
-                                                 buttons.forEach(b => {
-                                                           b.btn.disabled = true;
-                                                           if(b.book === todays.book){ b.btn.classList.add("is-correct"); }
-                                                           else if(b.btn === btn){ b.btn.classList.add("is-wrong"); }
-                                                 });
-                                                 resultEl.style.display = "block";
-                                                 resultEl.innerHTML =
-                                                           '<p class="daily-result-headline ' + (correct ? "is-correct" : "is-wrong") + '">' +
-                                                           (correct ? "Correct! \u2728" : "Not quite!") + "</p>" +
-                                                           '<p class="daily-result-citation">' + escapeHtml(todays.author) + " &middot; " + escapeHtml(todays.book) + (todays.chapter ? " &middot; " + escapeHtml(todays.chapter) : "") + "</p>" +
-                                                           (todays.background ? '<p class="daily-result-note context-note">' + escapeHtml(todays.background) + "</p>" : "");
-                                         };
-                                         buttons.push({btn: btn, book: book});
-                                         optionsEl.appendChild(btn);
-                                   });
-                               }
-
-  document.querySelector("[data-tab='daily']").addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-      document.querySelector("[data-tab='daily']").classList.add("active");
-      document.getElementById("view-daily").classList.add("active");
-      renderDailyChallenge();
-  });
-
-function normalizeForCompare(str){
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function textSimilarity(a, b){
-  const wordsA = new Set(a.split(" ").filter(Boolean));
-  const wordsB = new Set(b.split(" ").filter(Boolean));
-  if(wordsA.size === 0 || wordsB.size === 0) return 0;
-  let shared = 0;
-  wordsA.forEach(w => { if(wordsB.has(w)) shared++; });
-  const union = new Set([...wordsA, ...wordsB]).size;
-  return shared / union;
-}
-
-function findDuplicate(newText){
-  const normalizedNew = normalizeForCompare(newText);
-  for(const e of entries){
-    if(e.status === "rejected") continue;
-    const normalizedExisting = normalizeForCompare(e.text);
-    if(normalizedExisting === normalizedNew){
-      return e;
-    }
-    if(textSimilarity(normalizedNew, normalizedExisting) >= 0.82){
-      return e;
-    }
-  }
-  return null;
-}
-
-$("saveBtn").onclick = async ()=>{
-  const text = $("simileText").value.trim();
-  const author = $("authorInput").value.trim();
-  const book = $("bookInput").value.trim();
-  const chapter = $("chapterInput").value.trim();
-
-  if(!text){
-    showStatus("Write a simile first");
-    return;
-  }
-  if(!author || !book || !chapter){
-    showStatus("Author, book, and chapter are all required");
-    return;
-  }
-
-  const dupe = findDuplicate(text);
-  if(dupe){
-    showStatus(`Looks like this is already in the collection (${dupe.book}) — not submitted`);
-    return;
-  }
-
-  const entry = {
-    id: Date.now().toString(),
-    text,
-    author,
-    book,
-    chapter,
-    background: $("backgroundInput").value.trim(),
-    submitter: $("submitterInput").value.trim(),
-    category: $("categorySelect").value,
-    status: "pending"
-  };
-  entries.push(entry);
-  await saveEntries();
-
-  $("simileText").value = "";
-  $("authorInput").value = "";
-  $("bookInput").value = "";
-  $("chapterInput").value = "";
-  $("backgroundInput").value = "";
-  $("submitterInput").value = "";
-
-  updateBadge();
-  showStatus("Submitted for review");
-};
-
-
-$("addCategoryBtn").onclick = async ()=>{
-  const val = $("newCategory").value.trim();
-  if(!val) return;
-  if(categories.some(c => c.toLowerCase() === val.toLowerCase())){
-    showStatus("That category already exists");
-    return;
-  }
-  categories.push(val);
-  await saveCategories();
-  renderCategorySelect();
-  $("categorySelect").value = val;
-  renderFilters();
-  $("newCategory").value = "";
-  showStatus("Category added");
-};
-
-// Tabs
-document.querySelectorAll(".tab").forEach(tab=>{
-  tab.onclick = ()=>{
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-    tab.classList.add("active");
-    $("view-" + tab.dataset.tab).classList.add("active");
-    if(tab.dataset.tab === "library") renderLibrary();
-    if(tab.dataset.tab === "review" && unlocked) renderReview();
-  };
-});
-
-// Review lock
-$("unlockBtn").onclick = ()=>{
-  if($("pinInput").value === REVIEW_PIN){
-    unlocked = true;
-    $("lockCard").style.display = "none";
-    $("reviewList").style.display = "block";
-    $("lockAgainBtn").style.display = "block";
-    $("backupBar").style.display = "flex";
-    renderReview();
-  } else {
-    showStatus("");
-    $("pinInput").value = "";
-    $("pinInput").placeholder = "Wrong PIN, try again";
-  }
-};
-$("lockAgainBtn").onclick = ()=>{
-  unlocked = false;
-  $("lockCard").style.display = "block";
-  $("reviewList").style.display = "none";
-  $("lockAgainBtn").style.display = "none";
-  $("backupBar").style.display = "none";
-  $("pinInput").value = "";
-};
-
-$("exportBtn").onclick = ()=>{
-  const backup = {
-    categories: categories,
-    entries: entries,
-    exportedAt: new Date().toISOString()
-  };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  const today = new Date().toISOString().slice(0,10);
-  a.download = `simile-collector-backup-${today}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showStatus("Backup downloaded");
-};
-
-$("importBtn").onclick = ()=> $("importFile").click();
-
-$("importFile").onchange = (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async (evt)=>{
-    try{
-      const backup = JSON.parse(evt.target.result);
-      if(backup.entries){
-        entries = backup.entries;
-        await saveEntries();
-      }
-      if(backup.categories){
-        categories = Array.from(new Set([...DEFAULT_CATEGORIES, ...backup.categories]));
-        await saveCategories();
-      }
-      renderCategorySelect();
-      renderFilters();
-      renderLibrary();
-      updateBadge();
-      if(unlocked) renderReview();
-      showStatus("Backup loaded");
-    }catch(err){
-      showStatus("That file didn't look like a valid backup");
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
-};
-
-$("searchInput").oninput = ()=> renderLibrary();
 
 loadData();
 </script>
