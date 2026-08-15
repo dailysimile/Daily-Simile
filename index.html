@@ -58,7 +58,7 @@
   .brand{
     font-family: var(--serif); font-weight: 600; font-size: 1.32rem;
     letter-spacing: -0.01em; cursor: pointer; background:none; border:none;
-    padding: 0; color: var(--ink);
+    padding: 0; color: var(--indigo);
   }
   .brand span{ display:block; font-family: var(--sans); font-size: 0.7rem;
     letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
@@ -93,8 +93,8 @@
   /* ── hero ─────────────────────────────── */
   .hero-holder{ position: relative; }
   .hero-blob{
-    position:absolute; z-index:0; top: 30px; right: -10px;
-    width: 330px; height: 330px; border-radius: 999px;
+    position:absolute; z-index:0; top: -58px; right: -34px;
+    width: 250px; height: 250px; border-radius: 999px;
     background: #f6e3d4; pointer-events:none;
   }
   .hero{
@@ -234,6 +234,23 @@
   .cat-add{ display:flex; gap: 8px; margin-top: 8px; }
   .status{ min-height: 20px; font-size: 0.85rem; color: var(--accent-deep); font-weight: 600; margin-top: 10px; }
   .sticky{ position: sticky; top: 20px; }
+  .site-foot{
+    margin-top: 84px; padding-top: 26px; border-top: 1.5px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 18px; flex-wrap: wrap;
+  }
+  .site-foot p{ margin:0; color: var(--muted); font-size: 0.85rem; }
+  .site-foot a{
+    display:inline-flex; align-items:center; gap: 8px;
+    color: var(--accent-deep); font-size: 0.88rem; font-weight: 600;
+    text-decoration: none; border: 1.5px solid var(--line);
+    border-radius: 999px; padding: 8px 16px;
+  }
+  .site-foot a:hover{ border-color: var(--accent); color: var(--accent); }
+  .site-foot svg{ width: 17px; height: 17px; }
+  /* the search box is a cream pill, not a slate form field */
+  input.search{ background: var(--panel); border: 1.5px solid var(--line); border-radius: 999px; padding: 12px 18px; }
+  input.search:focus{ border-color: var(--accent); }
 
   /* ── challenge ────────────────────────── */
   .challenge{ display:grid; grid-template-columns: 1.05fr 0.95fr; gap: 44px; align-items: start; }
@@ -476,6 +493,18 @@
     </div>
     <div class="stack" id="reviewList" style="display:none;"></div>
     <button class="btn-quiet" id="lockAgainBtn" style="display:none;margin-top:18px;">Lock review screen</button>
+  </div>
+
+  <div class="site-foot">
+    <p>Simile Collector — a library of similes from books old and new.</p>
+    <a href="https://instagram.com/dailysimile3" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5"></rect>
+        <circle cx="12" cy="12" r="4"></circle>
+        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"></circle>
+      </svg>
+      @dailysimile3
+    </a>
   </div>
 
 </div>
@@ -1211,15 +1240,15 @@ function renderReview(){
 function renderEditForm(div, entry, after){
   div.innerHTML =
     '<p class="eyebrow" style="margin-bottom:12px;">Editing this simile</p>' +
-    '<div class="field"><label>Simile text</label><textarea class="edit-text" rows="3">' + escapeHtml(entry.text) + '</textarea></div>' +
-    '<div class="field"><label>Author</label><input class="edit-author" value="' + escapeHtml(entry.author || "") + '"></div>' +
+    '<div class="field"><label>Simile text</label><textarea class="input edit-text" rows="3">' + escapeHtml(entry.text) + '</textarea></div>' +
+    '<div class="field"><label>Author</label><input type="text" class="input edit-author" value="' + escapeHtml(entry.author || "") + '"></div>' +
     '<div class="row2">' +
-      '<div class="field"><label>Book</label><input class="edit-book" value="' + escapeHtml(entry.book || "") + '"></div>' +
-      '<div class="field"><label>Chapter</label><input class="edit-chapter" value="' + escapeHtml(entry.chapter || "") + '"></div>' +
+      '<div class="field"><label>Book</label><input type="text" class="input edit-book" value="' + escapeHtml(entry.book || "") + '"></div>' +
+      '<div class="field"><label>Chapter</label><input type="text" class="input edit-chapter" value="' + escapeHtml(entry.chapter || "") + '"></div>' +
     '</div>' +
-    '<div class="field"><label>Background</label><textarea class="edit-background" rows="2">' + escapeHtml(entry.background || "") + '</textarea></div>' +
-    '<div class="field"><label>Picture link</label><input class="edit-image" value="' + escapeHtml(entry.image || "") + '"></div>' +
-    '<div class="field"><label>Category</label><select class="edit-category">' +
+    '<div class="field"><label>Background</label><textarea class="input edit-background" rows="2">' + escapeHtml(entry.background || "") + '</textarea></div>' +
+    '<div class="field"><label>Picture link</label><input type="text" class="input edit-image" value="' + escapeHtml(entry.image || "") + '"></div>' +
+    '<div class="field"><label>Category</label><select class="input edit-category">' +
       categories.map(c => '<option value="' + escapeHtml(c) + '"' + (c === entry.category ? " selected" : "") + '>' + escapeHtml(c) + '</option>').join("") +
     '</select></div>' +
     '<div class="row"><button class="btn btn-sm btn-primary edit-save">Save changes</button>' +
