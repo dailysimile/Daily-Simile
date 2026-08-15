@@ -449,7 +449,7 @@
         <div class="field">
           <label for="imageInput">Picture link (optional)</label>
           <input id="imageInput" type="text" placeholder="Paste an image address">
-          <p class="tiny" style="margin-top:7px;">Leave it empty and the simile shows its initial instead. Only use pictures you have the right to use — out-of-copyright illustrations are safest.</p>
+          <p class="tiny" style="margin-top:7px;">Leave it empty and the simile shows the book’s illustration if there is one, or its initial. Only use pictures you have the right to use — out-of-copyright illustrations are safest.</p>
         </div>
         <div class="field">
           <label for="submitterInput">Your name (optional)</label>
@@ -658,7 +658,12 @@ function sourceLine(e){
   if(e.chapter) bits.push(e.chapter);
   return bits.length ? bits.join(" · ") : "Unknown source";
 }
-function artFor(e){ return e.image ? { url: e.image, credit: e.imageCredit || "" } : (BOOK_ART[e.book] || null); }
+function artFor(e){
+  const img = (e.image || "").trim();
+  if(/^(none|no|off|hide)$/i.test(img)) return null;   // typing "none" hides the picture
+  if(img) return { url: img, credit: e.imageCredit || "" };
+  return BOOK_ART[e.book] || null;
+}
 function initialOf(e){
   return (e.text || "?").replace(/^[^A-Za-z]*/, "").charAt(0).toUpperCase() || "?";
 }
@@ -1244,7 +1249,8 @@ function renderEditForm(div, entry, after){
       '<div class="field"><label>Chapter</label><input type="text" class="input edit-chapter" value="' + escapeHtml(entry.chapter || "") + '"></div>' +
     '</div>' +
     '<div class="field"><label>Background</label><textarea class="input edit-background" rows="2">' + escapeHtml(entry.background || "") + '</textarea></div>' +
-    '<div class="field"><label>Picture link</label><input type="text" class="input edit-image" value="' + escapeHtml(entry.image || "") + '"></div>' +
+    '<div class="field"><label>Picture link</label><input type="text" class="input edit-image" value="' + escapeHtml(entry.image || "") + '" placeholder="Paste an image address, or type none for no picture">' +
+      '<p class="tiny" style="margin-top:7px;">Empty uses the book\u2019s illustration if there is one. Type <strong>none</strong> to show the letter instead.</p></div>' +
     '<div class="field"><label>Category</label><select class="input edit-category">' +
       categories.map(c => '<option value="' + escapeHtml(c) + '"' + (c === entry.category ? " selected" : "") + '>' + escapeHtml(c) + '</option>').join("") +
     '</select></div>' +
