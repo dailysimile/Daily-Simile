@@ -685,6 +685,23 @@ function wireCard(el){
   el.querySelectorAll("[data-open]").forEach(b => {
     b.onclick = (ev) => { ev.stopPropagation(); showSimile(b.getAttribute("data-open")); };
   });
+  el.querySelectorAll("[data-edit]").forEach(b => {
+    b.onclick = (ev) => {
+      ev.stopPropagation();
+      const entry = entryById(b.getAttribute("data-edit"));
+      if(!entry) return;
+      const card = b.closest(".entry") || b.closest(".panel");
+      if(card) renderEditForm(card, entry, () => { renderLibrary(); renderHome(); });
+    };
+  });
+  el.querySelectorAll("[data-delete]").forEach(b => {
+    b.onclick = (ev) => {
+      ev.stopPropagation();
+      const entry = entryById(b.getAttribute("data-delete"));
+      if(!entry) return;
+      if(window.confirm("Delete this simile?\n\n" + entry.text)) deleteEntry(entry.id);
+    };
+  });
 }
 
 function entryCardHtml(e, opts){
@@ -701,7 +718,12 @@ function entryCardHtml(e, opts){
       (e.book ? ' · <button class="book-link" data-book="' + escapeHtml(e.book) + '">' + escapeHtml(e.book) + '</button>' : "") +
       (e.chapter ? ' · ' + escapeHtml(e.chapter) : "") + '</p>' +
     teaser + credit +
-    '<div class="row" style="margin-top:4px;">' + saveBtnHtml(e) + '</div>' +
+    '<div class="row" style="margin-top:4px;">' + saveBtnHtml(e) +
+      (unlocked
+        ? '<button class="btn btn-sm" data-edit="' + escapeHtml(e.id) + '">Edit</button>' +
+          '<button class="btn btn-sm btn-danger" data-delete="' + escapeHtml(e.id) + '">Delete</button>'
+        : "") +
+    '</div>' +
   '</div>';
 }
 
@@ -864,6 +886,10 @@ function renderSimileDetail(id){
         '<div class="row" style="margin-top:4px;">' + saveBtnHtml(e) +
           (e.book ? '<button class="btn btn-sm" data-book="' + escapeHtml(e.book) + '">' +
             (sameBook ? sameBook + " more from this book" : "This book’s page") + '</button>' : "") +
+          (unlocked
+            ? '<button class="btn btn-sm" data-edit="' + escapeHtml(e.id) + '">Edit</button>' +
+              '<button class="btn btn-sm btn-danger" data-delete="' + escapeHtml(e.id) + '">Delete</button>'
+            : "") +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1184,6 +1210,7 @@ function renderReview(){
 
 function renderEditForm(div, entry, after){
   div.innerHTML =
+    '<p class="eyebrow" style="margin-bottom:12px;">Editing this simile</p>' +
     '<div class="field"><label>Simile text</label><textarea class="edit-text" rows="3">' + escapeHtml(entry.text) + '</textarea></div>' +
     '<div class="field"><label>Author</label><input class="edit-author" value="' + escapeHtml(entry.author || "") + '"></div>' +
     '<div class="row2">' +
@@ -1225,7 +1252,8 @@ async function reviewEntry(id, decision){
 async function deleteEntry(id){
   entries = entries.filter(e => e.id !== id);
   await saveEntries();
-  renderLibrary(); renderHome();
+  renderLibrary(); renderHome(); renderSaved();
+  if(currentView === "simile") switchTab("library");
   showStatus("Deleted");
 }
 
@@ -1402,6 +1430,8 @@ $("unlockBtn").onclick = async () => {
     $("lockAgainBtn").style.display = "block";
     $("backupBar").style.display = "flex";
     renderReview();
+    renderLibrary();
+    showStatus("Unlocked — you can edit anything in the Library");
   } else {
     $("pinInput").value = "";
     $("pinInput").placeholder = "Wrong password, try again";
@@ -1410,6 +1440,7 @@ $("unlockBtn").onclick = async () => {
 $("lockAgainBtn").onclick = () => {
   unlocked = false;
   setReviewKey("");
+  renderLibrary();
   $("lockCard").style.display = "block";
   $("reviewList").style.display = "none";
   $("lockAgainBtn").style.display = "none";
