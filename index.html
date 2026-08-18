@@ -116,13 +116,21 @@
   .note{ margin: 0; color: var(--muted); font-size: 1rem; }
   .tiny{ margin: 0; color: var(--muted); font-size: 0.75rem; }
 
+  /* ── photo picker ──────────────────────── */
+  .photo-pick{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .photo-thumb{ width:62px; height:62px; border-radius:999px; flex:none;
+    background:var(--panel-2) center/cover no-repeat; border:1px solid var(--line); }
+  .photo-note{ margin-top:8px; min-height:0; }
+  .photo-note:empty{ display:none; }
+
   /* ── circular art ─────────────────────── */
   .art{
-    flex: none; border-radius: 999px; overflow: hidden;
+    flex: none; border-radius: 999px; overflow: hidden; position: relative;
     background: var(--panel-2); display: flex; align-items: center; justify-content: center;
     font-family: var(--serif); font-weight: 600; color: var(--muted);
   }
-  .art img{ width:100%; height:100%; object-fit: cover; display:block;
+  .art img{ position:absolute; inset:0; flex:none; width:100%; height:100%;
+    object-fit: cover; object-position: center; display:block;
     filter: saturate(0.82) contrast(0.94); }
   .art-xl{ width: 186px; height: 186px; font-size: 3rem; }
   .art-lg{ width: 140px; height: 140px; font-size: 2.4rem; }
@@ -367,6 +375,10 @@
   <div class="view" id="view-library">
     <h2>Library</h2>
     <p class="sub" id="libraryCount"></p>
+    <div class="row" id="editLockRow" style="margin:-4px 0 14px;">
+      <span class="tiny">Editing published similes is password-protected.</span>
+      <button class="btn btn-sm" id="unlockEditingBtn">Unlock editing</button>
+    </div>
     <input type="text" id="searchInput" class="search" placeholder="Search by author, book, or category…">
     <div class="filters" id="filters"></div>
     <div class="grid" id="list"></div>
@@ -447,9 +459,21 @@
           <textarea id="backgroundInput" placeholder="A sentence or two on what's happening in the story, or why the comparison works"></textarea>
         </div>
         <div class="field">
-          <label for="imageInput">Picture link (optional)</label>
-          <input id="imageInput" type="text" placeholder="Paste an image address">
-          <p class="tiny" style="margin-top:7px;">Leave it empty and the simile shows the book’s illustration if there is one, or its initial. Only use pictures you have the right to use — out-of-copyright illustrations are safest.</p>
+          <label>Picture (optional)</label>
+          <div class="photo-pick">
+            <div class="photo-thumb" id="photoThumb"></div>
+            <div class="row" style="gap:8px;">
+              <button type="button" class="btn btn-sm" id="photoPickBtn">Choose photo</button>
+              <button type="button" class="btn btn-sm" id="photoClearBtn">Remove</button>
+            </div>
+          </div>
+          <input type="file" accept="image/*" id="photoFile" style="display:none;">
+          <p class="tiny photo-note" id="photoNote"></p>
+          <p class="tiny" style="margin-top:7px;">Pick a photo from your computer or phone — it is resized and stored for you. Leave it empty and the simile shows the book’s illustration if there is one, or its initial. Only use pictures you have the right to use — out-of-copyright illustrations are safest.</p>
+          <details style="margin-top:10px;">
+            <summary class="tiny" style="cursor:pointer;">Or paste a picture link instead</summary>
+            <input id="imageInput" type="text" placeholder="Paste an image address" style="margin-top:8px;">
+          </details>
         </div>
         <div class="field">
           <label for="submitterInput">Your name (optional)</label>
@@ -557,6 +581,101 @@ function escapeHtml(str){
   const d = document.createElement("div");
   d.textContent = str == null ? "" : str;
   return d.innerHTML;
+}
+
+/* ── photo upload ──────────────────────────────────────────────
+   The browser shrinks the picture, the Worker commits it to the repo
+   and hands back its address, so no one has to handle a link. */
+const MAX_IMAGE_EDGE = 1200;
+
+function readFileAsDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = () => reject(new Error("Could not read that file"));
+    fr.readAsDataURL(file);
+  });
+}
+
+async function shrinkImage(file){
+  const dataUrl = await readFileAsDataUrl(file);
+  const img = await new Promise((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error("That file isn't a picture we can read"));
+    i.src = dataUrl;
+  });
+  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(img.width, img.height));
+  const w = Math.max(1, Math.round(img.width * scale));
+  const h = Math.max(1, Math.round(img.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+  let quality = 0.82;
+  let out = canvas.toDataURL("image/jpeg", quality);
+  while(out.length > 700000 && quality > 0.4){
+    quality -= 0.12;
+    out = canvas.toDataURL("image/jpeg", quality);
+  }
+  return out.split(",")[1];
+}
+
+async function uploadPhoto(file){
+  const data = await shrinkImage(file);
+  const res = await fetch(WORKER_API + "/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data })
+  });
+  let body = {};
+  try{ body = await res.json(); }catch(e){}
+  if(!res.ok || !body.url) throw new Error(body.error || "Upload failed — try again");
+  return body.url;
+}
+
+/* Wires one "choose a photo" control to the picture-link field that
+   actually gets saved, so both routes end up in the same place. */
+function wirePhotoPicker(scope, sel, onChange){
+  const fileInput = scope.querySelector(sel.file);
+  const pickBtn = scope.querySelector(sel.pick);
+  const clearBtn = scope.querySelector(sel.clear);
+  const thumb = scope.querySelector(sel.thumb);
+  const note = scope.querySelector(sel.note);
+  const link = scope.querySelector(sel.link);
+  if(!fileInput || !pickBtn || !link) return;
+
+  function paint(){
+    const v = (link.value || "").trim();
+    const show = Boolean(v) && v.toLowerCase() !== "none";
+    thumb.style.backgroundImage = show ? 'url("' + v.replace(/"/g, "%22") + '")' : "none";
+    clearBtn.style.display = show ? "inline-flex" : "none";
+    pickBtn.textContent = show ? "Change photo" : "Choose photo";
+  }
+  pickBtn.onclick = () => fileInput.click();
+  clearBtn.onclick = () => {
+    link.value = ""; note.textContent = "";
+    paint(); if(onChange) onChange();
+  };
+  link.addEventListener("input", paint);
+  fileInput.onchange = async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if(!file) return;
+    pickBtn.disabled = true;
+    note.textContent = "Preparing and uploading…";
+    try{
+      link.value = await uploadPhoto(file);
+      note.textContent = "Photo added";
+      paint();
+      if(onChange) onChange();
+    }catch(err){
+      note.textContent = err.message;
+    }
+    pickBtn.disabled = false;
+    fileInput.value = "";
+  };
+  paint();
 }
 
 /* ── shared storage (unchanged: private Worker holds the token) ── */
@@ -855,6 +974,9 @@ function renderLibrary(){
       || (e.book || "").toLowerCase().includes(searchTerm)
       || (e.category || "").toLowerCase().includes(searchTerm);
   });
+
+  const lockRow = $("editLockRow");
+  if(lockRow) lockRow.style.display = unlocked ? "none" : "flex";
 
   const books = new Set(approved.map(e => e.book).filter(Boolean));
   $("libraryCount").textContent = activeFilter === "All"
@@ -1249,8 +1371,20 @@ function renderEditForm(div, entry, after){
       '<div class="field"><label>Chapter</label><input type="text" class="input edit-chapter" value="' + escapeHtml(entry.chapter || "") + '"></div>' +
     '</div>' +
     '<div class="field"><label>Background</label><textarea class="input edit-background" rows="2">' + escapeHtml(entry.background || "") + '</textarea></div>' +
-    '<div class="field"><label>Picture link</label><input type="text" class="input edit-image" value="' + escapeHtml(entry.image || "") + '" placeholder="Paste an image address, or type none for no picture">' +
-      '<p class="tiny" style="margin-top:7px;">Empty uses the book\u2019s illustration if there is one. Type <strong>none</strong> to show the letter instead.</p></div>' +
+    '<div class="field"><label>Picture</label>' +
+      '<div class="photo-pick">' +
+        '<div class="photo-thumb edit-thumb"></div>' +
+        '<div class="row" style="gap:8px;">' +
+          '<button type="button" class="btn btn-sm edit-photo-pick">Choose photo</button>' +
+          '<button type="button" class="btn btn-sm edit-photo-clear">Remove</button>' +
+        '</div>' +
+      '</div>' +
+      '<input type="file" accept="image/*" class="edit-photo-file" style="display:none;">' +
+      '<p class="tiny photo-note edit-photo-note"></p>' +
+      '<p class="tiny" style="margin-top:7px;">Pick a photo from your computer or phone and it is resized and stored for you. Empty uses the book\u2019s illustration if there is one. Type <strong>none</strong> in the link field to show the letter instead.</p>' +
+      '<details style="margin-top:10px;"><summary class="tiny" style="cursor:pointer;">Or paste a picture link instead</summary>' +
+        '<input type="text" class="input edit-image" style="margin-top:8px;" value="' + escapeHtml(entry.image || "") + '" placeholder="Paste an image address, or type none for no picture"></details>' +
+    '</div>' +
     '<div class="field"><label>Category</label><select class="input edit-category">' +
       categories.map(c => '<option value="' + escapeHtml(c) + '"' + (c === entry.category ? " selected" : "") + '>' + escapeHtml(c) + '</option>').join("") +
     '</select></div>' +
@@ -1272,6 +1406,10 @@ function renderEditForm(div, entry, after){
     showStatus("Simile updated");
   };
   div.querySelector(".edit-cancel").onclick = () => { if(after) after(); else renderLibrary(); };
+  wirePhotoPicker(div, {
+    file: ".edit-photo-file", pick: ".edit-photo-pick", clear: ".edit-photo-clear",
+    thumb: ".edit-thumb", note: ".edit-photo-note", link: ".edit-image"
+  });
 }
 
 async function reviewEntry(id, decision){
@@ -1364,11 +1502,24 @@ function revealReviewTab(remember){
   });
 })();
 
+const unlockEditingBtn = $("unlockEditingBtn");
+if(unlockEditingBtn) unlockEditingBtn.onclick = () => {
+  revealReviewTab(false);
+  switchTab("review");
+  const pin = $("pinInput");
+  if(pin) pin.focus();
+};
+
 $("brandBtn").onclick = () => switchTab("home");
 $("backFromSimile").onclick = () => switchTab(lastView === "simile" ? "library" : lastView);
 $("backFromBook").onclick = () => switchTab("library");
 
 /* ── add form ── */
+wirePhotoPicker(document, {
+  file: "#photoFile", pick: "#photoPickBtn", clear: "#photoClearBtn",
+  thumb: "#photoThumb", note: "#photoNote", link: "#imageInput"
+}, renderAddPreview);
+
 ["simileText","authorInput","bookInput","chapterInput","backgroundInput","imageInput"].forEach(id => {
   $(id).addEventListener("input", renderAddPreview);
 });
@@ -1406,6 +1557,8 @@ $("saveBtn").onclick = async () => {
 
   ["simileText","authorInput","bookInput","chapterInput","backgroundInput","imageInput","submitterInput"]
     .forEach(id => { $(id).value = ""; });
+  $("photoNote").textContent = "";
+  $("imageInput").dispatchEvent(new Event("input"));
   renderAddPreview();
   showStatus("Submitted for review");
 
