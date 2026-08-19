@@ -631,6 +631,7 @@ async function uploadPhoto(file){
   });
   let body = {};
   try{ body = await res.json(); }catch(e){}
+  if(res.status === 404) throw new Error("The photo uploader isn't live yet — deploy the Worker in Cloudflare, then try again");
   if(!res.ok || !body.url) throw new Error(body.error || "Upload failed — try again");
   return body.url;
 }
@@ -736,11 +737,12 @@ async function saveCategories(){
     : "Couldn't save category"); }
 }
 async function saveEntries(){
-  try{ await storageSet("simile-entries", JSON.stringify(entries)); }
+  try{ await storageSet("simile-entries", JSON.stringify(entries)); return true; }
   catch(e){ showStatus(
     e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again"
     : e.message === "NOT_REVIEWER" ? "Unlock the review screen first — your session may have expired"
-    : "Couldn't save — try again"); }
+    : "Couldn't save — try again");
+    return false; }
 }
 
 /* ── saved list: this browser only ── */
@@ -1420,8 +1422,16 @@ async function reviewEntry(id, decision){
 }
 
 async function deleteEntry(id){
+  const before = entries.slice();
   entries = entries.filter(e => e.id !== id);
-  await saveEntries();
+  const saved = await saveEntries();
+  if(!saved){
+    // Nothing reached storage, so put the simile back rather than
+    // showing it as gone until the next refresh brings it back.
+    entries = before;
+    renderLibrary(); renderHome(); renderSaved();
+    return;
+  }
   renderLibrary(); renderHome(); renderSaved();
   if(currentView === "simile") switchTab("library");
   showStatus("Deleted");
