@@ -703,9 +703,9 @@ function reviewKey(){
 function setReviewKey(key){
   try{ if(key) sessionStorage.setItem(REVIEW_KEY_STORE, key); else sessionStorage.removeItem(REVIEW_KEY_STORE); }catch(e){}
 }
-async function storageSet(key, value){
+async function storageSetMany(pairs){
   blobCache = await fetchBlob();
-  blobCache[key] = value;
+  Object.keys(pairs).forEach(k => { blobCache[k] = pairs[k]; });
   const putRes = await fetch(WORKER_API, {
     method: "PUT",
     headers: { "Content-Type": "application/json", "X-Review-Key": reviewKey() },
@@ -714,6 +714,9 @@ async function storageSet(key, value){
   if(putRes.status === 401) throw new Error("NOT_REVIEWER");
   if(putRes.status === 403) throw new Error("RATE_LIMITED");
   if(!putRes.ok) throw new Error("Save request failed");
+}
+async function storageSet(key, value){
+  return storageSetMany({ [key]: value });
 }
 
 /* Visitors never get write access. A submission goes to its own worker route,
@@ -1421,14 +1424,33 @@ async function reviewEntry(id, decision){
   renderReview(); renderLibrary(); renderHome(); updateBadge();
 }
 
+/* Similes that shipped with the app are added back whenever they are
+   missing, so a deleted one has to be remembered as deleted on purpose. */
+let removedSeedIds = [];
+
 async function deleteEntry(id){
   const before = entries.slice();
+  const beforeRemoved = removedSeedIds.slice();
   entries = entries.filter(e => e.id !== id);
-  const saved = await saveEntries();
+  if(String(id).indexOf("seed-") === 0 && removedSeedIds.indexOf(id) === -1){
+    removedSeedIds.push(id);
+  }
+  let saved = true;
+  try{
+    await storageSetMany({
+      "simile-entries": JSON.stringify(entries),
+      "simile-removed-seeds": JSON.stringify(removedSeedIds)
+    });
+  }catch(e){
+    saved = false;
+    showStatus(
+      e.message === "RATE_LIMITED" ? "Too many changes at once — wait a minute and try again"
+      : e.message === "NOT_REVIEWER" ? "Unlock the review screen first — your session may have expired"
+      : "Couldn't delete — try again");
+  }
   if(!saved){
-    // Nothing reached storage, so put the simile back rather than
-    // showing it as gone until the next refresh brings it back.
     entries = before;
+    removedSeedIds = beforeRemoved;
     renderLibrary(); renderHome(); renderSaved();
     return;
   }
@@ -1834,11 +1856,18 @@ async function loadData(){
       : "Couldn't reach shared storage — showing what's saved on this device for now");
   }
 
+  try{
+    const removed = await storageGet("simile-removed-seeds");
+    if(removed) removedSeedIds = JSON.parse(removed) || [];
+  }catch(e){ removedSeedIds = []; }
+
   // Only add missing seeds — never overwrite an existing entry, so edits
-  // (like Background notes) are never silently reverted.
+  // (like Background notes) are never silently reverted, and never bring
+  // back one that was deleted on purpose.
   if(entriesLoadedOK){
     let changedSeed = false;
     SEED_ENTRIES.forEach(seed => {
+      if(removedSeedIds.indexOf(seed.id) !== -1) return;
       const idx = entries.findIndex(e => e.id === seed.id);
       if(idx === -1){
         const dupeByText = entries.some(e => e.text === seed.text && e.id.indexOf("seed-") !== 0);
@@ -1848,7 +1877,7 @@ async function loadData(){
     if(changedSeed){ await saveEntries(); }
   } else {
     // Display-only fallback: nothing is saved back, so shared data is safe.
-    entries = SEED_ENTRIES.slice();
+    entries = SEED_ENTRIES.slice().filter(s => removedSeedIds.indexOf(s.id) === -1);
   }
 
   loadSaved();
