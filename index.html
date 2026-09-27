@@ -173,6 +173,8 @@
   }
   .meta .book-link:hover{ text-decoration-color: var(--accent); }
   .teaser{ margin:0; font-size: 0.86rem; color: var(--muted); font-style: italic; }
+  .more-link{ background:none; border:none; padding:0; font: inherit; font-style: normal; font-weight: 600;
+    color: var(--accent-deep); cursor:pointer; text-decoration: underline; text-underline-offset: 3px; }
   .row{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
   .spacer{ flex: 1; }
 
@@ -711,12 +713,22 @@ function firstSentence(str){
   if(!str) return "";
   const m = str.match(/^.{0,150}?[.!?](\s|$)/);
   const out = (m ? m[0] : str.slice(0, 130)).trim();
-  return out.length < str.trim().length ? out + "…" : out;
+  return (out.length < str.trim().length && !m) ? out + "…" : out;
 }
 function approvedEntries(){ return entries.filter(e => !e.status || e.status === "approved"); }
 function entryById(id){ return entries.filter(e => e.id === id)[0] || null; }
 
 function wireCard(el){
+  el.querySelectorAll("[data-more]").forEach(b => {
+    b.onclick = (ev) => {
+      ev.stopPropagation();
+      const p = b.closest(".teaser");
+      const open = b.textContent === "Read less";
+      p.querySelector(".t-short").hidden = !open;
+      p.querySelector(".t-full").hidden = open;
+      b.textContent = open ? "Read more" : "Read less";
+    };
+  });
   el.querySelectorAll("[data-save]").forEach(b => {
     b.onclick = (ev) => { ev.stopPropagation(); toggleSaved(b.getAttribute("data-save")); };
   });
@@ -747,7 +759,15 @@ function wireCard(el){
 
 function entryCardHtml(e, opts){
   opts = opts || {};
-  const teaser = e.background ? '<p class="teaser">' + escapeHtml(firstSentence(e.background)) + '</p>' : "";
+  let teaser = "";
+  if(e.background){
+    const short = firstSentence(e.background);
+    const cut = short.replace(/…$/, "").length < e.background.trim().length;
+    teaser = cut
+      ? '<p class="teaser"><span class="t-short">' + escapeHtml(short) + '</span><span class="t-full" hidden>' + escapeHtml(e.background) + '</span> ' +
+        '<button class="more-link" data-more>Read more</button></p>'
+      : '<p class="teaser">' + escapeHtml(e.background) + '</p>';
+  }
   const wide = (e.text || "").length > 150 ? " wide" : "";
   const spine = colourFor(e.category).dot;
   return '<div class="entry' + wide + (opts.className ? " " + opts.className : "") + '" style="border-left-color:' + spine + ';">' +
