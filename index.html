@@ -150,7 +150,7 @@
   .tiny{ margin: 0; color: var(--muted); font-size: 0.75rem; }
 
   /* ── cards / grid ─────────────────────── */
-  .grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 24px; }
+  .grid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 24px; grid-auto-flow: row dense; }
   .entry{
     background: var(--panel); border: 1.5px solid var(--line);
     border-left: 7px solid var(--line-strong);
@@ -317,8 +317,9 @@
     border-radius: var(--radius); padding: 26px 28px;
     display:flex; flex-direction:column; gap: 12px; justify-content:center;
   }
-  .cta-card h4{ margin:0; font-size: 1.18rem; font-weight: 700; color: var(--accent-deep); line-height: 1.25; }
-  .cta-card p{ margin:0; font-size: 0.88rem; color: var(--accent-deep); }
+  .cta-card h4{ margin:0; font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--accent-deep); line-height: 1.15; }
+  .cta-card p{ margin:0; font-size: 0.92rem; line-height: 1.55; color: var(--accent-deep); }
+  .cta-card img{ width: 92px; height: auto; align-self: flex-start; margin-bottom: 2px; }
   .stack{ display:flex; flex-direction:column; gap: 16px; max-width: 860px; }
   .saved-row{
     background: var(--panel); border: 1.5px solid var(--line); border-radius: var(--radius);
@@ -886,8 +887,9 @@ function renderLibrary(){
 
   const cta = document.createElement("div");
   cta.className = "cta-card";
-  cta.innerHTML = '<h4>Found one while reading?</h4>' +
-    '<p>Send the quote, the chapter, and a line or two about the scene. Add a picture if you have one.</p>' +
+  cta.innerHTML = '<img src="teabooks.png" alt="" aria-hidden="true">' +
+    '<h4>Know a lovely simile?</h4>' +
+    '<p>From an old favourite or a book you are reading now. Share the line, the book, and the chapter, and it could join the library.</p>' +
     '<button class="btn btn-primary btn-sm" style="align-self:flex-start;" id="ctaAdd">Add a simile</button>';
   list.appendChild(cta);
   $("ctaAdd").onclick = () => switchTab("add");
