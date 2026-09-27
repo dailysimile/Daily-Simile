@@ -796,7 +796,7 @@ function renderHome(){
         (today.background ? '<p class="note">' + escapeHtml(today.background) + '</p>' : "") +
         '<div class="row" style="margin-top:6px;">' + saveBtnHtml(today) +
           '<p class="tiny">Saved similes stay in this browser — no account needed.</p></div>' +
-        '<div class="row"><button class="btn btn-sm" data-open="' + escapeHtml(today.id) + '">Read the background</button>' +
+        '<div class="row">' + (today.book && approvedEntries().filter(x => x.book === today.book).length > 1 ? '<button class="btn btn-sm" data-book="' + escapeHtml(today.book) + '">More from ' + escapeHtml(today.book) + '</button>' : '') +
           '<button class="btn btn-sm" id="toChallenge">Play today’s challenge</button></div>' +
       '</div>' + COZY_HTML;
     wireCard(hero);
