@@ -360,6 +360,9 @@
   .cglow{ animation: cglow 2.2s ease-in-out infinite; }
   @keyframes cglow{ 0%,100%{ opacity: 1; } 50%{ opacity: .75; } }
 
+  .tea-video{ display:block; width:100%; height:auto; aspect-ratio: 3 / 4; object-fit: cover; pointer-events:none;
+    -webkit-mask-image: radial-gradient(ellipse 56% 54% at 50% 52%, #000 62%, transparent 100%);
+            mask-image: radial-gradient(ellipse 56% 54% at 50% 52%, #000 62%, transparent 100%); }
   .steam-svg{ position:absolute; left: 38.5%; width: 22%; top: -4%; height: 32%; overflow: visible; pointer-events:none; }
   .wisp{ stroke: #ecd3a2; stroke-width: 13; stroke-dasharray: 85 115; opacity: 0;
     animation: wispRise 5.5s linear infinite; }
@@ -798,7 +801,7 @@ function pickDailySimile(offsetDays, salt){
   return pool[hash % pool.length];
 }
 
-const COZY_HTML = '<div class="cozy" aria-hidden="true"><div class="cup-wrap"><img src="teabooks.png" alt=""><svg class="steam-svg" viewBox="0 0 100 200" preserveAspectRatio="none"><defs><filter id="steamBlur" x="-50%" y="-20%" width="200%" height="140%"><feGaussianBlur stdDeviation="4"/></filter></defs><g filter="url(#steamBlur)" fill="none" stroke-linecap="round"><path pathLength="200" class="wisp w1" d="M50 198 C38 170 64 150 50 122 C36 94 62 74 48 46 C40 30 52 18 50 4"/><path pathLength="200" class="wisp w2" d="M44 198 C30 172 58 148 42 120 C28 92 54 70 40 42 C34 28 44 16 42 4"/><path pathLength="200" class="wisp w3" d="M56 198 C70 170 44 146 60 118 C74 92 48 68 62 40 C68 26 58 14 60 4"/></g></svg></div></div>';
+const COZY_HTML = '<div class="cozy" aria-hidden="true"><div class="cup-wrap"><video class="tea-video" src="tea-steam.mp4" autoplay muted loop playsinline preload="auto" disablepictureinpicture></video></div></div>';
 function renderHome(){
   const today = pickDailySimile(0);
   $("todayDate").textContent = "Today’s simile · " + new Date().toLocaleDateString(undefined, {day:"numeric", month:"long"});
